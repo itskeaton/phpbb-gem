@@ -329,6 +329,7 @@ class acp_profile_fields
 				'APPLIES_TO'    => $user->lang($this->allowed_applies_to[(int) $row['applies_to']]),
 				'REQUIRED'      => (bool) $row['required'],
 				'SEARCHABLE'    => (bool) $row['searchable'],
+				'SHOW_ON_ROSTER' => (bool) $row['show_on_roster'],
 				'SORT_ORDER'    => $row['sort_order'],
 				'U_EDIT'        => $this->u_action . "&amp;mode=fields&amp;action=edit&amp;field_id={$row['field_id']}",
 				'U_DELETE'      => $this->u_action . "&amp;mode=fields&amp;action=delete&amp;field_id={$row['field_id']}",
@@ -357,6 +358,7 @@ class acp_profile_fields
 			'required'             => 0,
 			'required_enforcement' => 'creation',
 			'searchable'           => 0,
+			'show_on_roster'       => 0,
 		);
 
 		if ($action == 'edit' && $field_id)
@@ -385,6 +387,7 @@ class acp_profile_fields
 			'FIELD_OPTIONS_TEXT'    => $field['field_options'],
 			'REQUIRED'              => (bool) $field['required'],
 			'SEARCHABLE'            => (bool) $field['searchable'],
+			'SHOW_ON_ROSTER'        => (bool) $field['show_on_roster'],
 			'U_SAVE'                => $this->u_action . '&amp;mode=fields&amp;action=save&amp;field_id=' . (int) $field_id,
 		));
 
@@ -412,6 +415,7 @@ class acp_profile_fields
 		$required    = $request->variable('required', 0);
 		$enforcement = $request->variable('required_enforcement', 'creation');
 		$searchable  = $request->variable('searchable', 0);
+		$show_on_roster = $request->variable('show_on_roster', 0);
 
 		if ($label === '')
 		{
@@ -463,6 +467,7 @@ class acp_profile_fields
 			'required'             => $required ? 1 : 0,
 			'required_enforcement' => $enforcement,
 			'searchable'           => $searchable ? 1 : 0,
+			'show_on_roster'       => $show_on_roster ? 1 : 0,
 		);
 
 		if ($field_id)

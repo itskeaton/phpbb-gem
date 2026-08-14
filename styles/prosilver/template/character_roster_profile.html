@@ -1,0 +1,76 @@
+<!-- INCLUDE overall_header.html -->
+
+<div id="gem-character-profile">
+	<div class="gem-profile-header">
+		<!-- IF AVATAR_URL -->
+			<img src="{AVATAR_URL}" alt="{CHARACTER_NAME}" class="gem-profile-avatar" />
+		<!-- ENDIF -->
+		<h1>{CHARACTER_NAME}</h1>
+	</div>
+
+	<!-- IF SIGNATURE -->
+	<div class="gem-profile-signature">{SIGNATURE}</div>
+	<!-- ENDIF -->
+
+	<!-- IF .profile_sections -->
+	<nav class="gem-profile-jumpnav">
+		<!-- BEGIN profile_sections -->
+			<!-- IF profile_sections.ANCHOR_SLUG -->
+			<a href="#{profile_sections.ANCHOR_SLUG}">{profile_sections.SECTION_NAME}</a>
+			<!-- ENDIF -->
+		<!-- END profile_sections -->
+	</nav>
+	<!-- ENDIF -->
+
+	<!-- BEGIN profile_sections -->
+	<section id="{profile_sections.ANCHOR_SLUG}" class="gem-profile-section">
+		<!-- IF profile_sections.SECTION_NAME -->
+		<h2>{profile_sections.SECTION_NAME}</h2>
+		<!-- ENDIF -->
+		<dl>
+			<!-- BEGIN profile_fields -->
+			<dt>{profile_sections.profile_fields.LABEL}</dt>
+			<dd>{profile_sections.profile_fields.VALUE}</dd>
+			<!-- END profile_fields -->
+		</dl>
+	</section>
+	<!-- END profile_sections -->
+
+	<!-- IF PLAYER_USERNAME -->
+	<section class="gem-profile-section">
+		<h2>{L_GEM_PLAYED_BY}</h2>
+		<p><a href="{U_PLAYER_PROFILE}" style="color: {PLAYER_COLOUR};">{PLAYER_USERNAME}</a></p>
+	</section>
+	<!-- ENDIF -->
+
+	<!-- IF .sibling_characters -->
+	<section class="gem-profile-section">
+		<h2>{L_GEM_OTHER_CHARACTERS}</h2>
+		<ul class="gem-sibling-list">
+			<!-- BEGIN sibling_characters -->
+			<li>
+				<a href="{sibling_characters.U_PROFILE}">
+					<!-- IF sibling_characters.AVATAR_URL -->
+					<img src="{sibling_characters.AVATAR_URL}" alt="{sibling_characters.CHARACTER_NAME}" />
+					<!-- ENDIF -->
+					{sibling_characters.CHARACTER_NAME}
+				</a>
+			</li>
+			<!-- END sibling_characters -->
+		</ul>
+	</section>
+	<!-- ENDIF -->
+
+	<!-- IF .recent_posts -->
+	<section class="gem-profile-section">
+		<h2>{L_GEM_RECENT_POSTS}</h2>
+		<ul>
+			<!-- BEGIN recent_posts -->
+			<li><a href="{recent_posts.U_POST}">{recent_posts.SUBJECT}</a> <span class="gensmall">{recent_posts.TIME}</span></li>
+			<!-- END recent_posts -->
+		</ul>
+	</section>
+	<!-- ENDIF -->
+</div>
+
+<!-- INCLUDE overall_footer.html -->

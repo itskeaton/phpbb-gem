@@ -1,0 +1,50 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_GEM_ROSTER_TITLE}</h1>
+
+<form id="gem-roster-filters" method="get" action="{U_ROSTER}">
+	<fieldset>
+		<label for="q">{L_GEM_SEARCH}</label>
+		<input type="text" id="q" name="q" value="{SEARCH_QUERY}" class="inputbox" />
+
+		<!-- BEGIN filters -->
+		<label for="filter_{filters.FIELD_ID}">{filters.LABEL}</label>
+		<select id="filter_{filters.FIELD_ID}" name="filter_{filters.FIELD_ID}">
+			<option value="">{L_GEM_ANY}</option>
+			<!-- BEGIN choices -->
+			<option value="{filters.choices.VALUE}"<!-- IF filters.choices.SELECTED --> selected="selected"<!-- ENDIF -->>{filters.choices.LABEL}</option>
+			<!-- END choices -->
+		</select>
+		<!-- END filters -->
+
+		<input type="submit" class="button1" value="{L_GEM_APPLY_FILTERS}" />
+	</fieldset>
+</form>
+
+<p class="gensmall">{TOTAL_RESULTS} {L_GEM_RESULTS_FOUND}</p>
+
+<div id="gem-roster-grid">
+	<!-- BEGIN characters -->
+	<div class="gem-roster-card">
+		<a href="{characters.U_PROFILE}">
+			<!-- IF characters.AVATAR_URL -->
+				<img src="{characters.AVATAR_URL}" alt="{characters.CHARACTER_NAME}" />
+			<!-- ENDIF -->
+			<h3>{characters.CHARACTER_NAME}</h3>
+		</a>
+		<!-- BEGIN roster_fields -->
+			<!-- IF characters.roster_fields.VALUE -->
+			<p class="gem-roster-field"><strong>{characters.roster_fields.LABEL}:</strong> {characters.roster_fields.VALUE}</p>
+			<!-- ENDIF -->
+		<!-- END roster_fields -->
+	</div>
+	<!-- END characters -->
+</div>
+
+<!-- IF not S_HAS_RESULTS -->
+	<p class="gensmall">{L_GEM_NO_RESULTS}</p>
+<!-- ENDIF -->
+
+<!-- INCLUDE pagination.html -->
+
+<!-- INCLUDE overall_footer.html -->

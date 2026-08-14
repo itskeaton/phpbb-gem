@@ -65,4 +65,13 @@ $lang = array_merge($lang, array(
 	'PROFILE_SORT_ORDER'            => 'Order',
 	'PROFILE_SAVE_ORDER'            => 'Save order',
 	'PROFILE_ORDER_UPDATED'         => 'Order updated.',
+
+	'ACP_GEM_SETTINGS'              => 'Settings',
+	'ACP_GEM_SETTINGS_SAVED'        => 'Settings saved.',
+	'GEM_REQUIRE_APPROVAL'          => 'Require staff approval for new characters',
+	'GEM_REQUIRE_APPROVAL_HINT'     => 'When off, new characters go live immediately. When on, they land as pending until reviewed via the Ticketing System.',
+	'GEM_MAX_CHARACTERS'            => 'Max characters per player',
+	'GEM_MAX_CHARACTERS_HINT'       => '0 = unlimited.',
+	'GEM_SELF_UNARCHIVE'            => 'Players may unarchive their own characters',
+	'GEM_SELF_UNARCHIVE_HINT'       => 'When off, unarchiving a character requires staff action instead.',
 ));

@@ -7,14 +7,50 @@
 		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
 		&nbsp;|&nbsp;
 		<a href="{U_SECTIONS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SETTINGS_MODE}" class="gem-tab">{L_ACP_GEM_SETTINGS}</a>
+	<!-- ELSEIF S_SETTINGS_MODE_TAB -->
+		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SETTINGS_MODE}" class="gem-tab gem-tab-active">{L_ACP_GEM_SETTINGS}</a>
 	<!-- ELSE -->
 		<a href="{U_FIELDS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
 		&nbsp;|&nbsp;
 		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SETTINGS_MODE}" class="gem-tab">{L_ACP_GEM_SETTINGS}</a>
 	<!-- ENDIF -->
 </p>
 
-<!-- IF S_SECTIONS_MODE and S_EDIT_SECTION -->
+<!-- IF S_SETTINGS_MODE -->
+	<form id="acp_gem_settings" method="post" action="{U_ACTION}&amp;mode=settings">
+		<fieldset>
+			<legend>{L_ACP_GEM_SETTINGS}</legend>
+			<dl>
+				<dt><label for="gem_require_approval">{L_GEM_REQUIRE_APPROVAL}</label></dt>
+				<dd><input type="checkbox" id="gem_require_approval" name="gem_require_approval" value="1"<!-- IF GEM_REQUIRE_APPROVAL --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_REQUIRE_APPROVAL_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="gem_max_characters">{L_GEM_MAX_CHARACTERS}</label></dt>
+				<dd><input type="number" id="gem_max_characters" name="gem_max_characters" value="{GEM_MAX_CHARACTERS}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_MAX_CHARACTERS_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="gem_self_unarchive">{L_GEM_SELF_UNARCHIVE}</label></dt>
+				<dd><input type="checkbox" id="gem_self_unarchive" name="gem_self_unarchive" value="1"<!-- IF GEM_SELF_UNARCHIVE --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_SELF_UNARCHIVE_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_SECTIONS_MODE and S_EDIT_SECTION -->
 	<!-- ============ SECTION ADD/EDIT FORM ============ -->
 	<form id="acp_section_form" method="post" action="{U_SAVE}">
 		<fieldset>

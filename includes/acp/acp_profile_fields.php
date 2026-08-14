@@ -56,18 +56,58 @@ class acp_profile_fields
 		$template->assign_vars(array(
 			'U_ACTION'      => $this->u_action,
 			'S_SECTIONS_MODE' => ($mode == 'sections'),
+			'S_SETTINGS_MODE_TAB' => ($mode == 'settings'),
 			'U_FIELDS_MODE'   => $this->u_action . '&amp;mode=fields',
 			'U_SECTIONS_MODE' => $this->u_action . '&amp;mode=sections',
+			'U_SETTINGS_MODE' => $this->u_action . '&amp;mode=settings',
 		));
 
 		if ($mode == 'sections')
 		{
 			$this->handle_sections($action, $id);
 		}
+		else if ($mode == 'settings')
+		{
+			$this->handle_settings();
+		}
 		else
 		{
 			$this->handle_fields($action, $id);
 		}
+	}
+
+	// -------------------------------------------------------------------
+	// Settings
+	// -------------------------------------------------------------------
+
+	private function handle_settings()
+	{
+		global $config, $template, $user, $request;
+
+		if ($request->is_set_post('submit'))
+		{
+			if (!check_form_key('acp_profile_fields'))
+			{
+				trigger_error('FORM_INVALID', E_USER_WARNING);
+			}
+
+			$require_approval = $request->variable('gem_require_approval', 0);
+			$max_characters   = $request->variable('gem_max_characters', 0);
+			$self_unarchive   = $request->variable('gem_self_unarchive', 0);
+
+			$config->set('gem_require_approval', $require_approval ? 1 : 0);
+			$config->set('gem_max_characters', max(0, $max_characters));
+			$config->set('gem_self_unarchive', $self_unarchive ? 1 : 0);
+
+			trigger_error($user->lang('ACP_GEM_SETTINGS_SAVED') . adm_back_link($this->u_action . '&amp;mode=settings'));
+		}
+
+		$template->assign_vars(array(
+			'S_SETTINGS_MODE'       => true,
+			'GEM_REQUIRE_APPROVAL'  => (bool) $config['gem_require_approval'],
+			'GEM_MAX_CHARACTERS'    => (int) $config['gem_max_characters'],
+			'GEM_SELF_UNARCHIVE'    => (bool) $config['gem_self_unarchive'],
+		));
 	}
 
 	// -------------------------------------------------------------------

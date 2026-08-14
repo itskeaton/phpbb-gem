@@ -1,0 +1,276 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_ACP_PROFILE_FIELDS}</h1>
+
+<p class="gem-mode-tabs">
+	<!-- IF S_SECTIONS_MODE -->
+		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SECTIONS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+	<!-- ELSE -->
+		<a href="{U_FIELDS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+		&nbsp;|&nbsp;
+		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+	<!-- ENDIF -->
+</p>
+
+<!-- IF S_SECTIONS_MODE and S_EDIT_SECTION -->
+	<!-- ============ SECTION ADD/EDIT FORM ============ -->
+	<form id="acp_section_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_PROFILE_SECTION_DETAILS}</legend>
+			<dl>
+				<dt><label for="section_name">{L_PROFILE_SECTION_NAME}</label></dt>
+				<dd><input type="text" id="section_name" name="section_name" value="{SECTION_NAME}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="anchor_slug">{L_PROFILE_ANCHOR_SLUG}</label></dt>
+				<dd><input type="text" id="anchor_slug" name="anchor_slug" value="{ANCHOR_SLUG}" maxlength="255" class="inputbox" />
+					<br /><span class="gem-hint">{L_PROFILE_ANCHOR_SLUG_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_SECTIONS_MODE -->
+	<!-- ============ SECTIONS LIST ============ -->
+	<p><a href="{U_ADD_SECTION}" class="button2">{L_PROFILE_ADD_SECTION}</a></p>
+
+	<form id="acp_sections_reorder" method="post" action="{U_ACTION}&amp;mode=sections&amp;action=reorder_numeric">
+	<table cellspacing="1" id="gem-sections-list">
+		<thead>
+			<tr>
+				<th>{L_PROFILE_SECTION_NAME}</th>
+				<th>{L_PROFILE_ANCHOR_SLUG}</th>
+				<th>{L_PROFILE_SORT_ORDER}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody id="gem-sections-tbody">
+			<!-- BEGIN sections -->
+			<tr draggable="true" data-id="{sections.SECTION_ID}" class="gem-draggable-row">
+				<td>&#9776; {sections.SECTION_NAME}</td>
+				<td>{sections.ANCHOR_SLUG}</td>
+				<td><input type="number" name="sort_order[{sections.SECTION_ID}]" value="{sections.SORT_ORDER}" size="4" class="inputbox" /></td>
+				<td>
+					<a href="{sections.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{sections.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END sections -->
+		</tbody>
+	</table>
+	<p class="submit-buttons">
+		<input type="submit" class="button1" value="{L_PROFILE_SAVE_ORDER}" />
+		{S_FORM_TOKEN}
+	</p>
+	</form>
+
+<!-- ELSEIF S_EDIT_FIELD -->
+	<!-- ============ FIELD ADD/EDIT FORM ============ -->
+	<form id="acp_field_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_PROFILE_FIELD_DETAILS}</legend>
+			<dl>
+				<dt><label for="label">{L_PROFILE_FIELD_LABEL}</label></dt>
+				<dd><input type="text" id="label" name="label" value="{LABEL}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="field_key">{L_PROFILE_FIELD_KEY}</label></dt>
+				<dd><input type="text" id="field_key" name="field_key" value="{FIELD_KEY}" maxlength="255" class="inputbox" />
+					<br /><span class="gem-hint">{L_PROFILE_FIELD_KEY_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="field_type">{L_PROFILE_FIELD_TYPE}</label></dt>
+				<dd>
+					<select id="field_type" name="field_type">
+						<!-- BEGIN field_types -->
+						<option value="{field_types.VALUE}"<!-- IF field_types.SELECTED --> selected="selected"<!-- ENDIF -->>{field_types.LABEL}</option>
+						<!-- END field_types -->
+					</select>
+				</dd>
+			</dl>
+			<dl id="gem-field-options-row">
+				<dt><label for="field_options">{L_PROFILE_FIELD_OPTIONS}</label></dt>
+				<dd><textarea id="field_options" name="field_options" rows="5" cols="40">{FIELD_OPTIONS_TEXT}</textarea>
+					<br /><span class="gem-hint">{L_PROFILE_FIELD_OPTIONS_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="section_id">{L_PROFILE_SECTION}</label></dt>
+				<dd>
+					<select id="section_id" name="section_id">
+						<!-- BEGIN section_options -->
+						<option value="{section_options.VALUE}"<!-- IF section_options.SELECTED --> selected="selected"<!-- ENDIF -->>{section_options.LABEL}</option>
+						<!-- END section_options -->
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="applies_to">{L_PROFILE_APPLIES_TO}</label></dt>
+				<dd>
+					<select id="applies_to" name="applies_to">
+						<!-- BEGIN applies_to_options -->
+						<option value="{applies_to_options.VALUE}"<!-- IF applies_to_options.SELECTED --> selected="selected"<!-- ENDIF -->>{applies_to_options.LABEL}</option>
+						<!-- END applies_to_options -->
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="required">{L_PROFILE_REQUIRED}</label></dt>
+				<dd><input type="checkbox" id="required" name="required" value="1"<!-- IF REQUIRED --> checked="checked"<!-- ENDIF --> /></dd>
+			</dl>
+			<dl>
+				<dt><label for="required_enforcement">{L_PROFILE_ENFORCEMENT}</label></dt>
+				<dd>
+					<select id="required_enforcement" name="required_enforcement">
+						<!-- BEGIN enforcement_options -->
+						<option value="{enforcement_options.VALUE}"<!-- IF enforcement_options.SELECTED --> selected="selected"<!-- ENDIF -->>{enforcement_options.LABEL}</option>
+						<!-- END enforcement_options -->
+					</select>
+					<br /><span class="gem-hint">{L_PROFILE_ENFORCEMENT_HINT}</span>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="searchable">{L_PROFILE_SEARCHABLE}</label></dt>
+				<dd><input type="checkbox" id="searchable" name="searchable" value="1"<!-- IF SEARCHABLE --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_PROFILE_SEARCHABLE_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSE -->
+	<!-- ============ FIELDS LIST ============ -->
+	<p><a href="{U_ADD_FIELD}" class="button2">{L_PROFILE_ADD_FIELD}</a></p>
+
+	<form id="acp_fields_reorder" method="post" action="{U_ACTION}&amp;mode=fields&amp;action=reorder_numeric">
+	<table cellspacing="1" id="gem-fields-list">
+		<thead>
+			<tr>
+				<th>{L_PROFILE_FIELD_LABEL}</th>
+				<th>{L_PROFILE_FIELD_KEY}</th>
+				<th>{L_PROFILE_FIELD_TYPE}</th>
+				<th>{L_PROFILE_SECTION}</th>
+				<th>{L_PROFILE_APPLIES_TO}</th>
+				<th>{L_PROFILE_REQUIRED}</th>
+				<th>{L_PROFILE_SEARCHABLE}</th>
+				<th>{L_PROFILE_SORT_ORDER}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody id="gem-fields-tbody">
+			<!-- BEGIN fields -->
+			<tr draggable="true" data-id="{fields.FIELD_ID}" class="gem-draggable-row">
+				<td>&#9776; {fields.LABEL}</td>
+				<td><code>{fields.FIELD_KEY}</code></td>
+				<td>{fields.FIELD_TYPE}</td>
+				<td>{fields.SECTION_NAME}</td>
+				<td>{fields.APPLIES_TO}</td>
+				<td><!-- IF fields.REQUIRED -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><!-- IF fields.SEARCHABLE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><input type="number" name="sort_order[{fields.FIELD_ID}]" value="{fields.SORT_ORDER}" size="4" class="inputbox" /></td>
+				<td>
+					<a href="{fields.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{fields.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END fields -->
+		</tbody>
+	</table>
+	<p class="submit-buttons">
+		<input type="submit" class="button1" value="{L_PROFILE_SAVE_ORDER}" />
+		{S_FORM_TOKEN}
+	</p>
+	</form>
+<!-- ENDIF -->
+
+<script>
+// Drag-and-drop reordering, alongside the numeric inputs above for anyone
+// who'd rather type a number than drag a row. Both write to the same
+// sort_order column - drag just does it immediately via AJAX instead of
+// requiring a form submit.
+(function () {
+	'use strict';
+
+	function enableDragReorder(tbodyId, ajaxAction) {
+		var tbody = document.getElementById(tbodyId);
+		if (!tbody) { return; }
+
+		var draggedRow = null;
+
+		tbody.addEventListener('dragstart', function (e) {
+			if (e.target.tagName === 'TR') {
+				draggedRow = e.target;
+				e.dataTransfer.effectAllowed = 'move';
+			}
+		});
+
+		tbody.addEventListener('dragover', function (e) {
+			e.preventDefault();
+			var targetRow = e.target.closest('tr');
+			if (!targetRow || targetRow === draggedRow) { return; }
+
+			var rect = targetRow.getBoundingClientRect();
+			var next = (e.clientY - rect.top) / rect.height > 0.5;
+			tbody.insertBefore(draggedRow, next ? targetRow.nextSibling : targetRow);
+		});
+
+		tbody.addEventListener('dragend', function () {
+			if (!draggedRow) { return; }
+
+			var ids = Array.prototype.map.call(tbody.querySelectorAll('tr'), function (row) {
+				return row.getAttribute('data-id');
+			});
+
+			var formTokenInput = document.querySelector('input[name="form_token"]');
+			var creationTimeInput = document.querySelector('input[name="creation_time"]');
+
+			var params = new URLSearchParams();
+			ids.forEach(function (id) { params.append('order[]', id); });
+			if (formTokenInput) { params.append('form_token', formTokenInput.value); }
+			if (creationTimeInput) { params.append('creation_time', creationTimeInput.value); }
+
+			fetch(ajaxAction, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: params.toString()
+			}).catch(function () {
+				// Silent fail is acceptable here - the numeric inputs are
+				// always available as a fallback save path.
+			});
+
+			draggedRow = null;
+		});
+	}
+
+	enableDragReorder('gem-sections-tbody', '{U_ACTION}&mode=sections&action=reorder_drag');
+	enableDragReorder('gem-fields-tbody', '{U_ACTION}&mode=fields&action=reorder_drag');
+
+	// Field-options textarea is only meaningful for select/multiselect -
+	// hide it otherwise so the form doesn't look like it does nothing.
+	var fieldTypeSelect = document.getElementById('field_type');
+	var optionsRow = document.getElementById('gem-field-options-row');
+	function toggleOptionsRow() {
+		if (!fieldTypeSelect || !optionsRow) { return; }
+		var relevant = (fieldTypeSelect.value === 'select' || fieldTypeSelect.value === 'multiselect');
+		optionsRow.style.display = relevant ? '' : 'none';
+	}
+	if (fieldTypeSelect) {
+		fieldTypeSelect.addEventListener('change', toggleOptionsRow);
+		toggleOptionsRow();
+	}
+})();
+</script>
+
+<!-- INCLUDE overall_footer.html -->

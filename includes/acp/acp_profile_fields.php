@@ -14,6 +14,8 @@
  *     quick manual edits without dragging anything
  */
 
+require_once(__DIR__ . '/../gem/points_helper.php');
+
 class acp_profile_fields
 {
 	var $u_action;
@@ -34,6 +36,14 @@ class acp_profile_fields
 	private $wanted_umbrella_tags_table;
 	/** @var string */
 	private $registration_steps_table;
+	/** @var string */
+	private $shop_items_table;
+	/** @var string */
+	private $shop_purchases_table;
+	/** @var string */
+	private $points_ledger_table;
+	/** @var string */
+	private $points_forum_rules_table;
 
 	private $allowed_field_types = array('text', 'textarea', 'select', 'multiselect', 'date', 'url', 'checkbox', 'image', 'songlist');
 	private $allowed_applies_to = array(1 => 'PROFILE_APPLIES_PLAYER', 2 => 'PROFILE_APPLIES_CHARACTER', 3 => 'PROFILE_APPLIES_BOTH');
@@ -55,6 +65,10 @@ class acp_profile_fields
 		$this->connection_categories_table = $table_prefix . 'connection_categories';
 		$this->wanted_umbrella_tags_table = $table_prefix . 'wanted_umbrella_tags';
 		$this->registration_steps_table = $table_prefix . 'registration_steps';
+		$this->shop_items_table = $table_prefix . 'shop_items';
+		$this->shop_purchases_table = $table_prefix . 'shop_purchases';
+		$this->points_ledger_table = $table_prefix . 'points_ledger';
+		$this->points_forum_rules_table = $table_prefix . 'points_forum_rules';
 
 		$action = $request->variable('action', 'list');
 
@@ -83,6 +97,12 @@ class acp_profile_fields
 			'S_WANTED_UMBRELLA_TAGS_MODE' => ($mode == 'wanted_umbrella_tags'),
 			'U_REGISTRATION_STEPS_MODE' => $this->u_action . '&amp;mode=registration_steps',
 			'S_REGISTRATION_STEPS_MODE' => ($mode == 'registration_steps'),
+			'U_SHOP_ITEMS_MODE' => $this->u_action . '&amp;mode=shop_items',
+			'S_SHOP_ITEMS_MODE' => ($mode == 'shop_items'),
+			'U_POINTS_AWARD_MODE' => $this->u_action . '&amp;mode=points_award',
+			'S_POINTS_AWARD_MODE' => ($mode == 'points_award'),
+			'U_POINTS_FORUM_RULES_MODE' => $this->u_action . '&amp;mode=points_forum_rules',
+			'S_POINTS_FORUM_RULES_MODE' => ($mode == 'points_forum_rules'),
 		));
 
 		if ($mode == 'sections')
@@ -108,6 +128,18 @@ class acp_profile_fields
 		else if ($mode == 'registration_steps')
 		{
 			$this->handle_registration_steps($action);
+		}
+		else if ($mode == 'shop_items')
+		{
+			$this->handle_shop_items($action);
+		}
+		else if ($mode == 'points_award')
+		{
+			$this->handle_points_award($action);
+		}
+		else if ($mode == 'points_forum_rules')
+		{
+			$this->handle_points_forum_rules();
 		}
 		else
 		{
@@ -135,12 +167,16 @@ class acp_profile_fields
 			$self_unarchive   = $request->variable('gem_self_unarchive', 0);
 			$gallery_quota    = $request->variable('gem_gallery_quota', 0);
 			$wanted_ad_cap    = $request->variable('gem_wanted_ad_cap', 10);
+			$points_per_app   = $request->variable('gem_points_per_approved_application', 0);
+			$points_per_reg   = $request->variable('gem_points_per_registration', 0);
 
 			$config->set('gem_require_approval', $require_approval ? 1 : 0);
 			$config->set('gem_max_characters', max(0, $max_characters));
 			$config->set('gem_self_unarchive', $self_unarchive ? 1 : 0);
 			$config->set('gem_gallery_quota', max(0, $gallery_quota));
 			$config->set('gem_wanted_ad_cap', max(0, $wanted_ad_cap));
+			$config->set('gem_points_per_approved_application', max(0, $points_per_app));
+			$config->set('gem_points_per_registration', max(0, $points_per_reg));
 
 			trigger_error($user->lang('ACP_GEM_SETTINGS_SAVED') . adm_back_link($this->u_action . '&amp;mode=settings'));
 		}
@@ -152,6 +188,8 @@ class acp_profile_fields
 			'GEM_SELF_UNARCHIVE'    => (bool) $config['gem_self_unarchive'],
 			'GEM_GALLERY_QUOTA'     => (int) $config['gem_gallery_quota'],
 			'GEM_WANTED_AD_CAP'     => (int) $config['gem_wanted_ad_cap'],
+			'GEM_POINTS_PER_APPROVED_APPLICATION' => (int) $config['gem_points_per_approved_application'],
+			'GEM_POINTS_PER_REGISTRATION' => (int) $config['gem_points_per_registration'],
 		));
 	}
 
@@ -1377,5 +1415,330 @@ class acp_profile_fields
 				'mode'    => 'registration_steps',
 			)));
 		}
+	}
+
+	// -------------------------------------------------------------------
+	// Shop items
+	// -------------------------------------------------------------------
+
+	private $allowed_item_types = array('character_slot', 'gallery_quota', 'wanted_ad_slot', 'cosmetic');
+
+	private function handle_shop_items($action)
+	{
+		global $db, $user, $template, $request;
+
+		$item_id = $request->variable('item_id', 0);
+
+		switch ($action)
+		{
+			case 'add':
+			case 'edit':
+				$this->shop_item_form($action, $item_id);
+				return;
+
+			case 'save':
+				$this->shop_item_save($item_id);
+				return;
+
+			case 'delete':
+				$this->shop_item_delete($item_id);
+				return;
+		}
+
+		$sql = 'SELECT * FROM ' . $this->shop_items_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('shop_items', array(
+				'ITEM_ID'     => $row['item_id'],
+				'NAME'        => $row['name'],
+				'COST'        => $row['cost'],
+				'ITEM_TYPE'   => $row['item_type'],
+				'S_ACTIVE'    => (bool) $row['active'],
+				'S_REPEATABLE' => (bool) $row['repeatable'],
+				'U_EDIT'      => $this->u_action . "&amp;mode=shop_items&amp;action=edit&amp;item_id={$row['item_id']}",
+				'U_DELETE'    => $this->u_action . "&amp;mode=shop_items&amp;action=delete&amp;item_id={$row['item_id']}",
+			));
+		}
+		$db->sql_freeresult($result);
+
+		$template->assign_vars(array(
+			'U_ADD_SHOP_ITEM' => $this->u_action . '&amp;mode=shop_items&amp;action=add',
+		));
+	}
+
+	private function shop_item_form($action, $item_id)
+	{
+		global $db, $template;
+
+		$item = array(
+			'name' => '', 'description' => '', 'cost' => 0, 'item_type' => 'cosmetic',
+			'effect_amount' => 0, 'repeatable' => 0, 'active' => 1,
+		);
+
+		if ($action == 'edit' && $item_id)
+		{
+			$sql = 'SELECT * FROM ' . $this->shop_items_table . ' WHERE item_id = ' . (int) $item_id;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$row)
+			{
+				trigger_error('GEM_SHOP_ITEM_NOT_FOUND', E_USER_WARNING);
+			}
+			$item = $row;
+		}
+
+		$template->assign_vars(array(
+			'S_EDIT_SHOP_ITEM' => true,
+			'ITEM_ID'          => $item_id,
+			'NAME'             => $item['name'],
+			'DESCRIPTION'      => $item['description'],
+			'COST'             => $item['cost'],
+			'EFFECT_AMOUNT'    => $item['effect_amount'],
+			'S_REPEATABLE'     => (bool) $item['repeatable'],
+			'S_ACTIVE'         => (bool) $item['active'],
+			'U_SAVE'           => $this->u_action . '&amp;mode=shop_items&amp;action=save&amp;item_id=' . (int) $item_id,
+		));
+
+		foreach ($this->allowed_item_types as $type)
+		{
+			$template->assign_block_vars('item_type_options', array(
+				'VALUE'    => $type,
+				'SELECTED' => ($type === $item['item_type']),
+			));
+		}
+	}
+
+	private function shop_item_save($item_id)
+	{
+		global $db, $user, $request;
+
+		if (!check_form_key('acp_profile_fields'))
+		{
+			trigger_error('FORM_INVALID', E_USER_WARNING);
+		}
+
+		$name = $request->variable('name', '', true);
+		$description = $request->variable('description', '', true);
+		$cost = $request->variable('cost', 0);
+		$item_type = $request->variable('item_type', 'cosmetic');
+		$effect_amount = $request->variable('effect_amount', 0);
+		$repeatable = $request->variable('repeatable', 0);
+		$active = $request->variable('active', 1);
+
+		if ($name === '')
+		{
+			trigger_error($user->lang('GEM_SHOP_ITEM_NAME_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=shop_items'), E_USER_WARNING);
+		}
+
+		if (!in_array($item_type, $this->allowed_item_types, true))
+		{
+			trigger_error('GEM_INVALID_ITEM_TYPE', E_USER_WARNING);
+		}
+
+		$sql_ary = array(
+			'name'          => $name,
+			'description'   => $description,
+			'cost'          => max(0, $cost),
+			'item_type'     => $item_type,
+			'effect_amount' => max(0, $effect_amount),
+			'repeatable'    => $repeatable ? 1 : 0,
+			'active'        => $active ? 1 : 0,
+		);
+
+		if ($item_id)
+		{
+			$sql = 'UPDATE ' . $this->shop_items_table . ' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE item_id = ' . (int) $item_id;
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->shop_items_table;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+			$sql_ary['sort_order'] = ((int) $row['max_order']) + 1;
+
+			$sql = 'INSERT INTO ' . $this->shop_items_table . ' ' . $db->sql_build_array('INSERT', $sql_ary);
+			$db->sql_query($sql);
+		}
+
+		trigger_error($user->lang('GEM_SHOP_ITEM_SAVED') . adm_back_link($this->u_action . '&amp;mode=shop_items'));
+	}
+
+	private function shop_item_delete($item_id)
+	{
+		global $db, $user;
+
+		if (!$item_id)
+		{
+			trigger_error('GEM_SHOP_ITEM_NOT_FOUND', E_USER_WARNING);
+		}
+
+		// Deliberately does NOT delete phpbb_shop_purchases rows referencing
+		// this item - past buyers keep their purchased effect (cap bonus or
+		// cosmetic ownership). Only the catalog listing goes away.
+		if (confirm_box(true))
+		{
+			$sql = 'DELETE FROM ' . $this->shop_items_table . ' WHERE item_id = ' . (int) $item_id;
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_SHOP_ITEM_DELETED') . adm_back_link($this->u_action . '&amp;mode=shop_items'));
+		}
+		else
+		{
+			confirm_box(false, 'GEM_SHOP_ITEM_DELETE_CONFIRM', build_hidden_fields(array(
+				'item_id' => $item_id,
+				'action'  => 'delete',
+				'mode'    => 'shop_items',
+			)));
+		}
+	}
+
+	// -------------------------------------------------------------------
+	// Manual points award/deduct
+	// -------------------------------------------------------------------
+
+	private function handle_points_award($action)
+	{
+		global $db, $user, $template, $request;
+
+		if ($request->is_set_post('submit'))
+		{
+			if (!check_form_key('acp_profile_fields'))
+			{
+				trigger_error('FORM_INVALID', E_USER_WARNING);
+			}
+
+			$username = $request->variable('username', '', true);
+			$amount = $request->variable('amount', 0);
+			$reason = $request->variable('reason', '', true);
+			$direction = $request->variable('direction', 'grant');
+
+			if ($username === '' || $amount <= 0 || $reason === '')
+			{
+				trigger_error($user->lang('GEM_POINTS_AWARD_FIELDS_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=points_award'), E_USER_WARNING);
+			}
+
+			$sql = 'SELECT user_id FROM ' . USERS_TABLE . " WHERE username = '" . $db->sql_escape($username) . "'";
+			$result = $db->sql_query($sql);
+			$target = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$target)
+			{
+				trigger_error($user->lang('GEM_USERNAME_NOT_FOUND', $username) . adm_back_link($this->u_action . '&amp;mode=points_award'), E_USER_WARNING);
+			}
+
+			$signed_amount = ($direction === 'deduct') ? -abs($amount) : abs($amount);
+			$entry_type = ($direction === 'deduct') ? 'manual_deduct' : 'manual_grant';
+
+			gem_points_transaction((int) $target['user_id'], $signed_amount, $reason, $entry_type, 0, (int) $user->data['user_id']);
+
+			trigger_error($user->lang('GEM_POINTS_AWARDED') . adm_back_link($this->u_action . '&amp;mode=points_award'));
+		}
+
+		// Recent manual/system activity across all players, for a quick sanity glance
+		$sql = 'SELECT l.*, u.username, changer.username AS changed_by_username
+				FROM ' . $this->points_ledger_table . ' l
+				LEFT JOIN ' . USERS_TABLE . ' u ON l.user_id = u.user_id
+				LEFT JOIN ' . USERS_TABLE . ' changer ON l.changed_by = changer.user_id
+				ORDER BY l.created_at DESC';
+		$result = $db->sql_query_limit($sql, 25);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('recent_ledger', array(
+				'USERNAME'    => $row['username'],
+				'AMOUNT'      => (int) $row['amount'],
+				'REASON'      => $row['reason'],
+				'ENTRY_TYPE'  => $row['entry_type'],
+				'CHANGED_BY'  => $row['changed_by_username'] ?: $user->lang('GEM_SYSTEM'),
+				'TIME'        => $user->format_date($row['created_at']),
+			));
+		}
+		$db->sql_freeresult($result);
+	}
+
+	// -------------------------------------------------------------------
+	// Per-forum points earning rules
+	// -------------------------------------------------------------------
+
+	/**
+	 * One big form, all forums at once, single save - unlike the CRUD
+	 * screens elsewhere, forums are a fixed list phpBB already manages
+	 * (FORUMS_TABLE), not entities Gem creates, so a per-row edit flow
+	 * doesn't make sense here. Same shape as how phpBB's own permission
+	 * screens work.
+	 */
+	private function handle_points_forum_rules()
+	{
+		global $db, $user, $template, $request;
+
+		if ($request->is_set_post('submit'))
+		{
+			if (!check_form_key('acp_profile_fields'))
+			{
+				trigger_error('FORM_INVALID', E_USER_WARNING);
+			}
+
+			$enabled = $request->variable('enabled', array(0));
+			$rule_types = $request->variable('rule_type', array(0 => ''));
+			$amounts = $request->variable('amount', array(0 => 0));
+			$words_per_point = $request->variable('words_per_point', array(0 => 0));
+
+			$sql = 'DELETE FROM ' . $this->points_forum_rules_table;
+			$db->sql_query($sql);
+
+			foreach ($enabled as $forum_id)
+			{
+				$forum_id = (int) $forum_id;
+				if (!$forum_id)
+				{
+					continue;
+				}
+
+				$rule_type = isset($rule_types[$forum_id]) && $rule_types[$forum_id] === 'per_words' ? 'per_words' : 'per_post';
+
+				$sql = 'INSERT INTO ' . $this->points_forum_rules_table . ' ' . $db->sql_build_array('INSERT', array(
+					'forum_id'        => $forum_id,
+					'rule_type'       => $rule_type,
+					'amount'          => max(0, (int) ($amounts[$forum_id] ?? 0)),
+					'words_per_point' => max(1, (int) ($words_per_point[$forum_id] ?? 100)),
+				));
+				$db->sql_query($sql);
+			}
+
+			trigger_error($user->lang('GEM_FORUM_RULES_SAVED') . adm_back_link($this->u_action . '&amp;mode=points_forum_rules'));
+		}
+
+		$sql = 'SELECT forum_id, rule_type, amount, words_per_point FROM ' . $this->points_forum_rules_table;
+		$result = $db->sql_query($sql);
+		$existing_rules = array();
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$existing_rules[(int) $row['forum_id']] = $row;
+		}
+		$db->sql_freeresult($result);
+
+		$sql = 'SELECT forum_id, forum_name FROM ' . FORUMS_TABLE . ' ORDER BY left_id ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$forum_id = (int) $row['forum_id'];
+			$rule = isset($existing_rules[$forum_id]) ? $existing_rules[$forum_id] : null;
+
+			$template->assign_block_vars('forums', array(
+				'FORUM_ID'         => $forum_id,
+				'FORUM_NAME'       => $row['forum_name'],
+				'S_ENABLED'        => ($rule !== null),
+				'S_PER_WORDS'      => ($rule && $rule['rule_type'] === 'per_words'),
+				'AMOUNT'           => $rule ? $rule['amount'] : 0,
+				'WORDS_PER_POINT'  => $rule ? $rule['words_per_point'] : 100,
+			));
+		}
+		$db->sql_freeresult($result);
 	}
 }

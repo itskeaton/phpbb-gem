@@ -47,6 +47,21 @@ class acp_profile_fields_info
 					'auth'  => 'acl_a_board',
 					'cat'   => array('ACP_CAT_GEM'),
 				),
+				'shop_items' => array(
+					'title' => 'ACP_SHOP_ITEMS',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
+				'points_award' => array(
+					'title' => 'ACP_POINTS_AWARD',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
+				'points_forum_rules' => array(
+					'title' => 'ACP_POINTS_FORUM_RULES',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
 			),
 		);
 	}

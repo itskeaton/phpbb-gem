@@ -9,6 +9,8 @@
  * meaningful end state, not an incomplete one.
  */
 
+require_once(__DIR__ . '/../gem/points_helper.php');
+
 class ucp_connections
 {
 	var $u_action;
@@ -22,6 +24,14 @@ class ucp_connections
 	function main($id, $mode)
 	{
 		global $db, $user, $template, $request, $table_prefix;
+
+		// Registration welcome bonus - idempotent, safe to check on every
+		// Gem UCP page visit. See points_helper.php for why this fires here
+		// instead of at the literal moment of registration.
+		if (!empty($user->data['is_registered']))
+		{
+			gem_maybe_award_registration_bonus((int) $user->data['user_id']);
+		}
 
 		$user->add_lang('ucp/connections');
 		$this->tpl_name = 'ucp_connections';

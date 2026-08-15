@@ -13,6 +13,8 @@
  * plus the tag/linking mechanics specific to plots.
  */
 
+require_once(__DIR__ . '/../gem/points_helper.php');
+
 class ucp_wanted
 {
 	var $u_action;
@@ -37,6 +39,14 @@ class ucp_wanted
 	function main($id, $mode)
 	{
 		global $db, $user, $template, $request, $table_prefix;
+
+		// Registration welcome bonus - idempotent, safe to check on every
+		// Gem UCP page visit. See points_helper.php for why this fires here
+		// instead of at the literal moment of registration.
+		if (!empty($user->data['is_registered']))
+		{
+			gem_maybe_award_registration_bonus((int) $user->data['user_id']);
+		}
 
 		$user->add_lang('ucp/wanted');
 		$this->tpl_name = 'ucp_wanted';
@@ -119,7 +129,7 @@ class ucp_wanted
 		global $db, $user, $template, $config;
 
 		$characters = $this->my_active_characters();
-		$cap = (int) $config['gem_wanted_ad_cap'];
+		$cap = gem_get_effective_cap((int) $user->data['user_id'], (int) $config['gem_wanted_ad_cap'], 'wanted_ad_slot');
 
 		foreach ($characters as $character)
 		{
@@ -328,7 +338,7 @@ class ucp_wanted
 		else
 		{
 			// enforce cap on new ads only
-			$cap = (int) $config['gem_wanted_ad_cap'];
+			$cap = gem_get_effective_cap((int) $user->data['user_id'], (int) $config['gem_wanted_ad_cap'], 'wanted_ad_slot');
 			if ($cap > 0)
 			{
 				$sql = 'SELECT COUNT(*) AS cnt FROM ' . $this->wanted_characters_table . ' WHERE character_id = ' . (int) $character_id;
@@ -385,7 +395,7 @@ class ucp_wanted
 		}
 		else
 		{
-			$cap = (int) $config['gem_wanted_ad_cap'];
+			$cap = gem_get_effective_cap((int) $user->data['user_id'], (int) $config['gem_wanted_ad_cap'], 'wanted_ad_slot');
 			if ($cap > 0)
 			{
 				$sql = 'SELECT COUNT(*) AS cnt FROM ' . $this->wanted_characters_table . ' WHERE character_id = ' . (int) $character_id;

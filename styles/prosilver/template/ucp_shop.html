@@ -1,0 +1,41 @@
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{L_UCP_SHOP_BROWSE}</h2>
+
+<p><strong>{L_GEM_YOUR_BALANCE}</strong> {BALANCE}</p>
+
+<div id="gem-shop-grid">
+	<!-- BEGIN shop_items -->
+	<div class="gem-shop-tile">
+		<h3>{shop_items.NAME}</h3>
+		<p>{shop_items.DESCRIPTION}</p>
+		<p><strong>{shop_items.COST}</strong> {L_GEM_POINTS}</p>
+		<!-- IF shop_items.S_ALREADY_OWNED -->
+			<span class="gensmall">{L_GEM_OWNED}</span>
+		<!-- ELSEIF shop_items.S_CAN_AFFORD -->
+			<form method="post" action="{shop_items.U_PURCHASE}">
+				<input type="submit" name="submit" class="button1" value="{L_GEM_PURCHASE}" />
+				{S_FORM_TOKEN}
+			</form>
+		<!-- ELSE -->
+			<span class="gensmall">{L_GEM_CANT_AFFORD}</span>
+		<!-- ENDIF -->
+	</div>
+	<!-- END shop_items -->
+</div>
+
+<h3>{L_GEM_RECENT_ACTIVITY}</h3>
+<table cellspacing="1">
+	<thead><tr><th>{L_GEM_AMOUNT}</th><th>{L_GEM_REASON}</th><th>{L_GEM_WHEN}</th></tr></thead>
+	<tbody>
+		<!-- BEGIN ledger -->
+		<tr>
+			<td>{ledger.AMOUNT}</td>
+			<td>{ledger.REASON}</td>
+			<td>{ledger.TIME}</td>
+		</tr>
+		<!-- END ledger -->
+	</tbody>
+</table>
+
+<!-- INCLUDE ucp_footer.html -->

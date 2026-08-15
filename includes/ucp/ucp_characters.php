@@ -21,6 +21,7 @@
  */
 
 require_once(__DIR__ . '/../gem/song_embed.php');
+require_once(__DIR__ . '/../gem/points_helper.php');
 
 class ucp_characters
 {
@@ -44,6 +45,14 @@ class ucp_characters
 	function main($id, $mode)
 	{
 		global $db, $user, $template, $request, $config, $table_prefix;
+
+		// Registration welcome bonus - idempotent, safe to check on every
+		// Gem UCP page visit. See points_helper.php for why this fires here
+		// instead of at the literal moment of registration.
+		if (!empty($user->data['is_registered']))
+		{
+			gem_maybe_award_registration_bonus((int) $user->data['user_id']);
+		}
 
 		$user->add_lang('ucp/characters');
 		$this->tpl_name = 'ucp_characters';
@@ -138,7 +147,7 @@ class ucp_characters
 		$db->sql_freeresult($result);
 
 		$active_or_pending = $this->count_active_or_pending($my_user_id);
-		$max = (int) $config['gem_max_characters'];
+		$max = gem_get_effective_cap($my_user_id, (int) $config['gem_max_characters'], 'character_slot');
 		$cap_reached = ($max > 0 && $active_or_pending >= $max);
 
 		$template->assign_vars(array(
@@ -219,7 +228,7 @@ class ucp_characters
 			// Creating new - enforce the cap here too (not just hiding the button),
 			// since the button being hidden client-side is not a real guard.
 			$active_or_pending = $this->count_active_or_pending($my_user_id);
-			$max = (int) $config['gem_max_characters'];
+			$max = gem_get_effective_cap($my_user_id, (int) $config['gem_max_characters'], 'character_slot');
 			if ($max > 0 && $active_or_pending >= $max)
 			{
 				trigger_error($user->lang('GEM_CHARACTER_CAP_REACHED') . adm_back_link($this->u_action), E_USER_WARNING);
@@ -357,7 +366,7 @@ class ucp_characters
 		else
 		{
 			$active_or_pending = $this->count_active_or_pending($my_user_id);
-			$max = (int) $config['gem_max_characters'];
+			$max = gem_get_effective_cap($my_user_id, (int) $config['gem_max_characters'], 'character_slot');
 			if ($max > 0 && $active_or_pending >= $max)
 			{
 				trigger_error($user->lang('GEM_CHARACTER_CAP_REACHED') . adm_back_link($this->u_action), E_USER_WARNING);
@@ -797,7 +806,7 @@ class ucp_characters
 			}
 
 			global $config;
-			$quota = (int) $config['gem_gallery_quota'];
+			$quota = gem_get_effective_cap((int) $user->data['user_id'], (int) $config['gem_gallery_quota'], 'gallery_quota');
 			if ($quota > 0)
 			{
 				$sql = 'SELECT COUNT(*) AS cnt FROM ' . $this->gallery_table . ' WHERE character_id = ' . (int) $character_id;

@@ -14,6 +14,8 @@
  * described: "one action, both records update."
  */
 
+require_once(__DIR__ . '/../gem/points_helper.php');
+
 class mcp_tickets
 {
 	var $u_action;
@@ -338,6 +340,8 @@ class mcp_tickets
 			'changed_at'   => time(),
 		));
 		$db->sql_query($sql);
+
+		gem_award_points_for_approval((int) $ticket['user_id'], (int) $ticket_id);
 
 		// If this was the player's first/only character, make it their default.
 		$sql = 'SELECT user_id FROM ' . $this->characters_active_table . ' WHERE user_id = ' . (int) $ticket['user_id'];

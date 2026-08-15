@@ -3,7 +3,7 @@
 <h1>{L_ACP_PROFILE_FIELDS}</h1>
 
 <p class="gem-mode-tabs">
-	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE and not S_WANTED_UMBRELLA_TAGS_MODE and not S_REGISTRATION_STEPS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE and not S_WANTED_UMBRELLA_TAGS_MODE and not S_REGISTRATION_STEPS_MODE and not S_SHOP_ITEMS_MODE and not S_POINTS_AWARD_MODE and not S_POINTS_FORUM_RULES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_SECTIONS_MODE}" class="gem-tab<!-- IF S_SECTIONS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
 	&nbsp;|&nbsp;
@@ -16,6 +16,12 @@
 	<a href="{U_WANTED_UMBRELLA_TAGS_MODE}" class="gem-tab<!-- IF S_WANTED_UMBRELLA_TAGS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_WANTED_UMBRELLA_TAGS}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_REGISTRATION_STEPS_MODE}" class="gem-tab<!-- IF S_REGISTRATION_STEPS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_REGISTRATION_STEPS}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_SHOP_ITEMS_MODE}" class="gem-tab<!-- IF S_SHOP_ITEMS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_SHOP_ITEMS}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_POINTS_AWARD_MODE}" class="gem-tab<!-- IF S_POINTS_AWARD_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_POINTS_AWARD}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_POINTS_FORUM_RULES_MODE}" class="gem-tab<!-- IF S_POINTS_FORUM_RULES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_POINTS_FORUM_RULES}</a>
 </p>
 
 <!-- IF S_SETTINGS_MODE -->
@@ -46,6 +52,20 @@
 				<dt><label for="gem_wanted_ad_cap">{L_GEM_WANTED_AD_CAP}</label></dt>
 				<dd><input type="number" id="gem_wanted_ad_cap" name="gem_wanted_ad_cap" value="{GEM_WANTED_AD_CAP}" min="0" size="4" class="inputbox" />
 					<br /><span class="gem-hint">{L_GEM_WANTED_AD_CAP_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt>{L_GEM_POST_EARNING_MOVED}</dt>
+				<dd><span class="gem-hint">{L_GEM_POST_EARNING_MOVED_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="gem_points_per_approved_application">{L_GEM_POINTS_PER_APPROVED_APPLICATION}</label></dt>
+				<dd><input type="number" id="gem_points_per_approved_application" name="gem_points_per_approved_application" value="{GEM_POINTS_PER_APPROVED_APPLICATION}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_POINTS_PER_APPROVED_APPLICATION_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="gem_points_per_registration">{L_GEM_POINTS_PER_REGISTRATION}</label></dt>
+				<dd><input type="number" id="gem_points_per_registration" name="gem_points_per_registration" value="{GEM_POINTS_PER_REGISTRATION}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_POINTS_PER_REGISTRATION_HINT}</span></dd>
 			</dl>
 		</fieldset>
 		<p class="submit-buttons">
@@ -272,6 +292,182 @@
 	</table>
 	<p class="submit-buttons">
 		<input type="submit" class="button1" value="{L_PROFILE_SAVE_ORDER}" />
+		{S_FORM_TOKEN}
+	</p>
+	</form>
+
+<!-- ELSEIF S_SHOP_ITEMS_MODE and S_EDIT_SHOP_ITEM -->
+	<!-- ============ SHOP ITEM ADD/EDIT FORM ============ -->
+	<form id="acp_shop_item_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_SHOP_ITEM_DETAILS}</legend>
+			<dl>
+				<dt><label for="name">{L_GEM_ITEM_NAME}</label></dt>
+				<dd><input type="text" id="name" name="name" value="{NAME}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="description">{L_GEM_ITEM_DESCRIPTION}</label></dt>
+				<dd><textarea id="description" name="description" rows="4" cols="45">{DESCRIPTION}</textarea></dd>
+			</dl>
+			<dl>
+				<dt><label for="cost">{L_GEM_ITEM_COST}</label></dt>
+				<dd><input type="number" id="cost" name="cost" value="{COST}" min="0" size="6" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="item_type">{L_GEM_ITEM_TYPE}</label></dt>
+				<dd>
+					<select id="item_type" name="item_type">
+						<!-- BEGIN item_type_options -->
+						<option value="{item_type_options.VALUE}"<!-- IF item_type_options.SELECTED --> selected="selected"<!-- ENDIF -->>{item_type_options.VALUE}</option>
+						<!-- END item_type_options -->
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="effect_amount">{L_GEM_EFFECT_AMOUNT}</label></dt>
+				<dd><input type="number" id="effect_amount" name="effect_amount" value="{EFFECT_AMOUNT}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_EFFECT_AMOUNT_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="repeatable">{L_GEM_REPEATABLE}</label></dt>
+				<dd><input type="checkbox" id="repeatable" name="repeatable" value="1"<!-- IF S_REPEATABLE --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_REPEATABLE_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="active">{L_GEM_ITEM_ACTIVE}</label></dt>
+				<dd><input type="checkbox" id="active" name="active" value="1"<!-- IF S_ACTIVE --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_ITEM_ACTIVE_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_SHOP_ITEMS_MODE -->
+	<!-- ============ SHOP ITEMS LIST ============ -->
+	<p><a href="{U_ADD_SHOP_ITEM}" class="button2">{L_GEM_ADD_SHOP_ITEM}</a></p>
+
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_ITEM_NAME}</th>
+				<th>{L_GEM_ITEM_COST}</th>
+				<th>{L_GEM_ITEM_TYPE}</th>
+				<th>{L_GEM_REPEATABLE}</th>
+				<th>{L_GEM_ITEM_ACTIVE}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN shop_items -->
+			<tr>
+				<td>{shop_items.NAME}</td>
+				<td>{shop_items.COST}</td>
+				<td>{shop_items.ITEM_TYPE}</td>
+				<td><!-- IF shop_items.S_REPEATABLE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><!-- IF shop_items.S_ACTIVE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td>
+					<a href="{shop_items.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{shop_items.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END shop_items -->
+		</tbody>
+	</table>
+
+<!-- ELSEIF S_POINTS_AWARD_MODE -->
+	<!-- ============ MANUAL POINTS AWARD/DEDUCT ============ -->
+	<form id="acp_points_award_form" method="post" action="{U_ACTION}&amp;mode=points_award">
+		<fieldset>
+			<legend>{L_ACP_POINTS_AWARD}</legend>
+			<dl>
+				<dt><label for="username">{L_GEM_USERNAME}</label></dt>
+				<dd><input type="text" id="username" name="username" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="direction">{L_GEM_DIRECTION}</label></dt>
+				<dd>
+					<select id="direction" name="direction">
+						<option value="grant">{L_GEM_GRANT}</option>
+						<option value="deduct">{L_GEM_DEDUCT}</option>
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="amount">{L_GEM_AMOUNT}</label></dt>
+				<dd><input type="number" id="amount" name="amount" min="1" size="6" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="reason">{L_GEM_REASON}</label></dt>
+				<dd><input type="text" id="reason" name="reason" maxlength="255" class="inputbox medium" /></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_GEM_APPLY}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+	<h3>{L_GEM_RECENT_ACTIVITY}</h3>
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_USERNAME}</th>
+				<th>{L_GEM_AMOUNT}</th>
+				<th>{L_GEM_REASON}</th>
+				<th>{L_GEM_CHANGED_BY}</th>
+				<th>{L_GEM_WHEN}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN recent_ledger -->
+			<tr>
+				<td>{recent_ledger.USERNAME}</td>
+				<td>{recent_ledger.AMOUNT}</td>
+				<td>{recent_ledger.REASON}</td>
+				<td>{recent_ledger.CHANGED_BY}</td>
+				<td>{recent_ledger.TIME}</td>
+			</tr>
+			<!-- END recent_ledger -->
+		</tbody>
+	</table>
+
+<!-- ELSEIF S_POINTS_FORUM_RULES_MODE -->
+	<!-- ============ PER-FORUM POINTS EARNING RULES ============ -->
+	<p class="gensmall">{L_GEM_FORUM_RULES_INTRO}</p>
+	<form id="acp_points_forum_rules_form" method="post" action="{U_ACTION}&amp;mode=points_forum_rules">
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_FORUM_NAME}</th>
+				<th>{L_GEM_EARNS_POINTS}</th>
+				<th>{L_GEM_RULE_TYPE}</th>
+				<th>{L_GEM_AMOUNT}</th>
+				<th>{L_GEM_WORDS_PER_POINT}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN forums -->
+			<tr>
+				<td>{forums.FORUM_NAME}</td>
+				<td><input type="checkbox" name="enabled[]" value="{forums.FORUM_ID}"<!-- IF forums.S_ENABLED --> checked="checked"<!-- ENDIF --> /></td>
+				<td>
+					<select name="rule_type[{forums.FORUM_ID}]">
+						<option value="per_post"<!-- IF not forums.S_PER_WORDS --> selected="selected"<!-- ENDIF -->>{L_GEM_PER_POST}</option>
+						<option value="per_words"<!-- IF forums.S_PER_WORDS --> selected="selected"<!-- ENDIF -->>{L_GEM_PER_WORDS}</option>
+					</select>
+				</td>
+				<td><input type="number" name="amount[{forums.FORUM_ID}]" value="{forums.AMOUNT}" min="0" size="4" class="inputbox" /></td>
+				<td><input type="number" name="words_per_point[{forums.FORUM_ID}]" value="{forums.WORDS_PER_POINT}" min="1" size="4" class="inputbox" /></td>
+			</tr>
+			<!-- END forums -->
+		</tbody>
+	</table>
+	<p class="submit-buttons">
+		<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
 		{S_FORM_TOKEN}
 	</p>
 	</form>

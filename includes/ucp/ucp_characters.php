@@ -10,10 +10,11 @@
  *     driver framework (upload/gravatar/remote picker). Stored as
  *     avatar_type = 'avatar.driver.remote' so it should render correctly
  *     through phpBB's existing avatar pipeline, but there's no upload UI.
- *   - Dynamic fields of type 'image' and 'songlist' render as a disabled
- *     placeholder ("coming soon") rather than functioning - the gallery
- *     storage and song-embed subsystems haven't been built yet. Nothing
- *     here silently pretends they work.
+ *   - Dynamic fields of type 'songlist' render as a disabled placeholder
+ *     ("coming soon") - the song-embed subsystem hasn't been built yet.
+ *     The 'image' field type and the character gallery, however, ARE now
+ *     functional (see the gallery actions below) - only songlist remains
+ *     a stub.
  *   - Staff-only actions (unarchive when self-serve is off) are gated on
  *     $auth->acl_get('a_') as a stand-in for a real "staff" permission.
  *     Replace with a dedicated ACL permission before relying on this for
@@ -30,6 +31,7 @@ class ucp_characters
 	private $fields_table;
 	private $values_table;
 	private $sections_table;
+	private $gallery_table;
 
 	// keep in sync with the enum documented in add_player_character_split.php
 	const STATUS_ACTIVE      = 1;
@@ -52,6 +54,7 @@ class ucp_characters
 		$this->fields_table            = $table_prefix . 'profile_fields';
 		$this->values_table            = $table_prefix . 'profile_values';
 		$this->sections_table          = $table_prefix . 'profile_sections';
+		$this->gallery_table           = $table_prefix . 'character_gallery';
 
 		add_form_key('ucp_characters');
 
@@ -75,6 +78,22 @@ class ucp_characters
 
 			case 'unarchive':
 				$this->character_unarchive($character_id);
+				return;
+
+			case 'gallery':
+				$this->gallery_view($character_id);
+				return;
+
+			case 'gallery_add':
+				$this->gallery_add($character_id);
+				return;
+
+			case 'gallery_delete':
+				$this->gallery_delete($character_id, $request->variable('image_id', 0));
+				return;
+
+			case 'gallery_set_default':
+				$this->gallery_set_default($character_id, $request->variable('image_id', 0));
 				return;
 		}
 
@@ -112,6 +131,7 @@ class ucp_characters
 				'U_EDIT'         => $this->u_action . "&amp;action=edit&amp;character_id={$row['character_id']}",
 				'U_ARCHIVE'      => $this->u_action . "&amp;action=archive&amp;character_id={$row['character_id']}",
 				'U_UNARCHIVE'    => $this->u_action . "&amp;action=unarchive&amp;character_id={$row['character_id']}",
+				'U_GALLERY'      => $this->u_action . "&amp;action=gallery&amp;character_id={$row['character_id']}",
 			));
 		}
 		$db->sql_freeresult($result);
@@ -251,7 +271,7 @@ class ucp_characters
 		while ($row = $db->sql_fetchrow($result))
 		{
 			$raw_value = isset($existing_values[$row['field_id']]) ? $existing_values[$row['field_id']] : '';
-			$is_unsupported = in_array($row['field_type'], array('image', 'songlist'), true);
+			$is_unsupported = in_array($row['field_type'], array('songlist'), true);
 
 			$block = array(
 				'FIELD_ID'      => $row['field_id'],
@@ -267,6 +287,7 @@ class ucp_characters
 				'S_MULTISELECT' => ($row['field_type'] === 'multiselect'),
 				'S_DATE'        => ($row['field_type'] === 'date'),
 				'S_URL'         => ($row['field_type'] === 'url'),
+				'S_IMAGE'       => ($row['field_type'] === 'image'),
 				'S_CHECKBOX'    => ($row['field_type'] === 'checkbox'),
 				'VALUE'         => ($row['field_type'] !== 'multiselect') ? $raw_value : '',
 				'CHECKED'       => ($row['field_type'] === 'checkbox' && $raw_value === '1'),
@@ -418,7 +439,7 @@ class ucp_characters
 
 		foreach ($fields as $field)
 		{
-			if (in_array($field['field_type'], array('image', 'songlist'), true))
+			if (in_array($field['field_type'], array('songlist'), true))
 			{
 				continue; // not functional yet - see class doc comment
 			}
@@ -595,5 +616,168 @@ class ucp_characters
 			'changed_at'   => time(),
 		));
 		$db->sql_query($sql);
+	}
+
+	// -------------------------------------------------------------------
+	// Gallery (sidebar / misc albums)
+	// -------------------------------------------------------------------
+
+	/**
+	 * Confirms the current user owns this character. Every gallery action
+	 * needs this - a player only ever manages their own characters' albums.
+	 */
+	private function owned_character_or_die($character_id)
+	{
+		global $db, $user;
+
+		$sql = 'SELECT * FROM ' . $this->characters_table . '
+				WHERE character_id = ' . (int) $character_id . '
+				AND user_id = ' . (int) $user->data['user_id'];
+		$result = $db->sql_query($sql);
+		$character = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		if (!$character)
+		{
+			trigger_error('GEM_CHARACTER_NOT_FOUND', E_USER_WARNING);
+		}
+
+		return $character;
+	}
+
+	private function gallery_view($character_id)
+	{
+		global $db, $template;
+
+		$character = $this->owned_character_or_die($character_id);
+
+		$template->assign_vars(array(
+			'S_GALLERY_VIEW' => true,
+			'CHARACTER_ID'   => $character_id,
+			'CHARACTER_NAME' => $character['character_name'],
+			'U_GALLERY_ADD'  => $this->u_action . '&amp;action=gallery_add&amp;character_id=' . (int) $character_id,
+		));
+
+		foreach (array('sidebar', 'misc') as $album)
+		{
+			$sql = 'SELECT * FROM ' . $this->gallery_table . '
+					WHERE character_id = ' . (int) $character_id . "
+					AND album = '" . $db->sql_escape($album) . "'
+					ORDER BY sort_order ASC";
+			$result = $db->sql_query($sql);
+			while ($row = $db->sql_fetchrow($result))
+			{
+				$template->assign_block_vars($album . '_images', array(
+					'IMAGE_ID'    => $row['image_id'],
+					'IMAGE_URL'   => $row['image_url'],
+					'LABEL'       => $row['label'],
+					'IS_DEFAULT'  => (bool) $row['is_default'],
+					'U_DELETE'    => $this->u_action . '&amp;action=gallery_delete&amp;character_id=' . (int) $character_id . '&amp;image_id=' . $row['image_id'],
+					'U_SET_DEFAULT' => $this->u_action . '&amp;action=gallery_set_default&amp;character_id=' . (int) $character_id . '&amp;image_id=' . $row['image_id'],
+				));
+			}
+			$db->sql_freeresult($result);
+		}
+	}
+
+	private function gallery_add($character_id)
+	{
+		global $db, $user, $request, $template;
+
+		$character = $this->owned_character_or_die($character_id);
+
+		if ($request->is_set_post('submit'))
+		{
+			if (!check_form_key('ucp_characters'))
+			{
+				trigger_error('FORM_INVALID', E_USER_WARNING);
+			}
+
+			$album = $request->variable('album', 'misc');
+			$image_url = $request->variable('image_url', '', true);
+			$label = $request->variable('label', '', true);
+
+			if (!in_array($album, array('sidebar', 'misc'), true))
+			{
+				trigger_error('GEM_INVALID_ALBUM', E_USER_WARNING);
+			}
+
+			if ($image_url === '')
+			{
+				trigger_error($user->lang('GEM_IMAGE_URL_REQUIRED') . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id), E_USER_WARNING);
+			}
+
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->gallery_table . '
+					WHERE character_id = ' . (int) $character_id . " AND album = '" . $db->sql_escape($album) . "'";
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			$sql = 'INSERT INTO ' . $this->gallery_table . ' ' . $db->sql_build_array('INSERT', array(
+				'character_id' => (int) $character_id,
+				'album'        => $album,
+				'image_url'    => $image_url,
+				'label'        => $label,
+				'is_default'   => 0,
+				'sort_order'   => ((int) $row['max_order']) + 1,
+				'created_at'   => time(),
+			));
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_IMAGE_ADDED') . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id));
+		}
+
+		$template->assign_vars(array(
+			'S_GALLERY_ADD_FORM' => true,
+			'CHARACTER_ID'       => $character_id,
+			'CHARACTER_NAME'     => $character['character_name'],
+			'U_GALLERY_SAVE'     => $this->u_action . '&amp;action=gallery_add&amp;character_id=' . (int) $character_id,
+		));
+	}
+
+	private function gallery_delete($character_id, $image_id)
+	{
+		global $db, $user;
+
+		$this->owned_character_or_die($character_id);
+
+		if (!$image_id)
+		{
+			trigger_error('GEM_IMAGE_NOT_FOUND', E_USER_WARNING);
+		}
+
+		$sql = 'DELETE FROM ' . $this->gallery_table . '
+				WHERE image_id = ' . (int) $image_id . '
+				AND character_id = ' . (int) $character_id;
+		$db->sql_query($sql);
+
+		trigger_error($user->lang('GEM_IMAGE_DELETED') . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id));
+	}
+
+	private function gallery_set_default($character_id, $image_id)
+	{
+		global $db, $user;
+
+		$this->owned_character_or_die($character_id);
+
+		if (!$image_id)
+		{
+			trigger_error('GEM_IMAGE_NOT_FOUND', E_USER_WARNING);
+		}
+
+		// Only one default per character, and only within the sidebar album -
+		// clear any existing default first.
+		$sql = 'UPDATE ' . $this->gallery_table . ' SET is_default = 0
+				WHERE character_id = ' . (int) $character_id . "
+				AND album = 'sidebar'";
+		$db->sql_query($sql);
+
+		$sql = 'UPDATE ' . $this->gallery_table . ' SET is_default = 1
+				WHERE image_id = ' . (int) $image_id . '
+				AND character_id = ' . (int) $character_id . "
+				AND album = 'sidebar'";
+		$db->sql_query($sql);
+
+		trigger_error($user->lang('GEM_DEFAULT_SET') . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id));
 	}
 }

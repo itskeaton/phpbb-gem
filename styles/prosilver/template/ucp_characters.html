@@ -2,7 +2,71 @@
 
 <h2>{L_UCP_CHARACTERS_MANAGE}</h2>
 
-<!-- IF S_ARCHIVE_PROMPT -->
+<!-- IF S_GALLERY_ADD_FORM -->
+
+	<h3>{L_GEM_ADD_IMAGE} &raquo; {CHARACTER_NAME}</h3>
+	<form id="ucp_gallery_add" method="post" action="{U_GALLERY_SAVE}">
+		<fieldset>
+			<dl>
+				<dt><label for="album">{L_GEM_ALBUM}</label></dt>
+				<dd>
+					<select id="album" name="album">
+						<option value="sidebar">{L_GEM_ALBUM_SIDEBAR}</option>
+						<option value="misc">{L_GEM_ALBUM_MISC}</option>
+					</select>
+					<br /><span class="gensmall">{L_GEM_ALBUM_HINT}</span>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="image_url">{L_GEM_IMAGE_URL}</label></dt>
+				<dd><input type="text" id="image_url" name="image_url" class="inputbox" placeholder="https://..." /></dd>
+			</dl>
+			<dl>
+				<dt><label for="label">{L_GEM_IMAGE_LABEL}</label></dt>
+				<dd><input type="text" id="label" name="label" maxlength="255" class="inputbox" /></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_GALLERY_VIEW -->
+
+	<h3>{L_GEM_GALLERY} &raquo; {CHARACTER_NAME}</h3>
+	<p><a href="{U_GALLERY_ADD}" class="button2">{L_GEM_ADD_IMAGE}</a></p>
+
+	<h4>{L_GEM_ALBUM_SIDEBAR}</h4>
+	<p class="gensmall">{L_GEM_SIDEBAR_ALBUM_HINT}</p>
+	<div class="gem-gallery-grid">
+		<!-- BEGIN sidebar_images -->
+		<div class="gem-gallery-tile">
+			<img src="{sidebar_images.IMAGE_URL}" alt="{sidebar_images.LABEL}" style="max-width: 120px; max-height: 120px;" />
+			<p>{sidebar_images.LABEL}</p>
+			<!-- IF sidebar_images.IS_DEFAULT -->
+				<strong>{L_GEM_DEFAULT}</strong>
+			<!-- ELSE -->
+				<a href="{sidebar_images.U_SET_DEFAULT}">{L_GEM_SET_DEFAULT}</a>
+			<!-- ENDIF -->
+			&nbsp;|&nbsp;
+			<a href="{sidebar_images.U_DELETE}">{L_DELETE}</a>
+		</div>
+		<!-- END sidebar_images -->
+	</div>
+
+	<h4>{L_GEM_ALBUM_MISC}</h4>
+	<div class="gem-gallery-grid">
+		<!-- BEGIN misc_images -->
+		<div class="gem-gallery-tile">
+			<img src="{misc_images.IMAGE_URL}" alt="{misc_images.LABEL}" style="max-width: 120px; max-height: 120px;" />
+			<p>{misc_images.LABEL}</p>
+			<a href="{misc_images.U_DELETE}">{L_DELETE}</a>
+		</div>
+		<!-- END misc_images -->
+	</div>
+
+<!-- ELSEIF S_ARCHIVE_PROMPT -->
 
 	<p>{L_GEM_ARCHIVE_PROMPT_INTRO}</p>
 	<form id="ucp_character_archive" method="post" action="{U_ARCHIVE_SUBMIT}">
@@ -68,6 +132,11 @@
 						<textarea id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" rows="4" cols="45">{custom_fields.VALUE}</textarea>
 					<!-- ELSEIF custom_fields.S_URL -->
 						<input type="url" id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" value="{custom_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF custom_fields.S_IMAGE -->
+						<input type="text" id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" value="{custom_fields.VALUE}" class="inputbox" placeholder="https://..." />
+						<!-- IF custom_fields.VALUE -->
+						<br /><img src="{custom_fields.VALUE}" alt="" style="max-width: 150px; max-height: 150px; margin-top: 4px;" />
+						<!-- ENDIF -->
 					<!-- ELSEIF custom_fields.S_DATE -->
 						<input type="date" id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" value="{custom_fields.VALUE}" class="inputbox" />
 					<!-- ELSEIF custom_fields.S_CHECKBOX -->
@@ -125,6 +194,8 @@
 					<!-- IF characters.S_ACTIVE -->
 						&nbsp;|&nbsp;
 						<a href="{characters.U_ARCHIVE}">{L_GEM_ARCHIVE}</a>
+						&nbsp;|&nbsp;
+						<a href="{characters.U_GALLERY}">{L_GEM_MANAGE_GALLERY}</a>
 					<!-- ENDIF -->
 					<!-- IF characters.S_ARCHIVED and S_SELF_UNARCHIVE -->
 						&nbsp;|&nbsp;

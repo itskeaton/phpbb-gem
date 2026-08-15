@@ -1,0 +1,36 @@
+<!-- IF GEM_S_HAS_CHARACTERS -->
+<fieldset id="gem-post-switcher">
+	<legend>{L_GEM_POSTING_AS}</legend>
+	<dl>
+		<dt><label for="gem_character_id">{L_GEM_CHARACTER}</label></dt>
+		<dd>
+			<select id="gem_character_id" name="gem_character_id">
+				<option value="0">{L_GEM_POST_AS_PLAYER}</option>
+				<!-- BEGIN gem_characters -->
+				<option value="{gem_characters.CHARACTER_ID}"<!-- IF gem_characters.SELECTED --> selected="selected"<!-- ENDIF -->>{gem_characters.CHARACTER_NAME}</option>
+				<!-- END gem_characters -->
+			</select>
+		</dd>
+	</dl>
+	<dl>
+		<dt><label for="gem_set_default">{L_GEM_SET_AS_DEFAULT}</label></dt>
+		<dd><input type="checkbox" id="gem_set_default" name="gem_set_default" value="1" />
+			<br /><span class="gensmall">{L_GEM_SET_AS_DEFAULT_HINT}</span></dd>
+	</dl>
+
+	<!-- IF .gem_sidebar_images -->
+	<dl>
+		<dt><label for="gem_sidebar_image_id">{L_GEM_SIDEBAR_IMAGE}</label></dt>
+		<dd>
+			<select id="gem_sidebar_image_id" name="gem_sidebar_image_id">
+				<option value="0">{L_GEM_USE_DEFAULT_IMAGE}</option>
+				<!-- BEGIN gem_sidebar_images -->
+				<option value="{gem_sidebar_images.IMAGE_ID}"<!-- IF gem_sidebar_images.SELECTED --> selected="selected"<!-- ENDIF -->>{gem_sidebar_images.LABEL}</option>
+				<!-- END gem_sidebar_images -->
+			</select>
+			<br /><span class="gensmall">{L_GEM_SIDEBAR_IMAGE_HINT}</span>
+		</dd>
+	</dl>
+	<!-- ENDIF -->
+</fieldset>
+<!-- ENDIF -->

@@ -1,0 +1,64 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_GEM_REGISTRATION_WIZARD_TITLE}</h1>
+
+<p class="gensmall">{L_GEM_STEP_OF} {CURRENT_STEP} {L_GEM_OF} {TOTAL_STEPS}</p>
+
+<div id="gem-wizard-step">
+	<h2>{STEP_TITLE}</h2>
+
+	<div id="gem-wizard-content" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 12px;">
+		{STEP_CONTENT}
+	</div>
+
+	<form id="gem-wizard-form" method="post" action="{U_SUBMIT}">
+		<!-- IF S_REQUIRE_ACK -->
+		<p>
+			<label>
+				<input type="checkbox" id="gem-wizard-acknowledge" name="acknowledge" value="1" />
+				{L_GEM_ACKNOWLEDGE}
+			</label>
+		</p>
+		<!-- ENDIF -->
+
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="<!-- IF S_LAST_STEP -->{L_GEM_CONTINUE_TO_REGISTRATION}<!-- ELSE -->{L_GEM_NEXT_STEP}<!-- ENDIF -->" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+</div>
+
+<script>
+// Anti-skim enhancement: disable the acknowledgment checkbox until the
+// content div has been scrolled to the bottom. Fully optional - without
+// JS, the checkbox just works normally with no scroll requirement.
+(function () {
+	'use strict';
+
+	var content = document.getElementById('gem-wizard-content');
+	var checkbox = document.getElementById('gem-wizard-acknowledge');
+
+	if (!content || !checkbox) {
+		return; // no acknowledgment required on this step, nothing to enhance
+	}
+
+	checkbox.disabled = true;
+
+	function checkScrolled() {
+		var scrolledToBottom = (content.scrollTop + content.clientHeight) >= (content.scrollHeight - 5);
+		if (scrolledToBottom) {
+			checkbox.disabled = false;
+		}
+	}
+
+	// If the content doesn't even need scrolling (fits on screen), don't
+	// block on a scroll event that will never fire.
+	if (content.scrollHeight <= content.clientHeight) {
+		checkbox.disabled = false;
+	} else {
+		content.addEventListener('scroll', checkScrolled);
+	}
+})();
+</script>
+
+<!-- INCLUDE overall_footer.html -->

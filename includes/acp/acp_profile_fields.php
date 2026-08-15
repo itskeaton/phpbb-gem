@@ -32,6 +32,8 @@ class acp_profile_fields
 	private $connection_categories_table;
 	/** @var string */
 	private $wanted_umbrella_tags_table;
+	/** @var string */
+	private $registration_steps_table;
 
 	private $allowed_field_types = array('text', 'textarea', 'select', 'multiselect', 'date', 'url', 'checkbox', 'image', 'songlist');
 	private $allowed_applies_to = array(1 => 'PROFILE_APPLIES_PLAYER', 2 => 'PROFILE_APPLIES_CHARACTER', 3 => 'PROFILE_APPLIES_BOTH');
@@ -52,6 +54,7 @@ class acp_profile_fields
 		$this->ticket_category_fields_table = $table_prefix . 'ticket_category_fields';
 		$this->connection_categories_table = $table_prefix . 'connection_categories';
 		$this->wanted_umbrella_tags_table = $table_prefix . 'wanted_umbrella_tags';
+		$this->registration_steps_table = $table_prefix . 'registration_steps';
 
 		$action = $request->variable('action', 'list');
 
@@ -78,6 +81,8 @@ class acp_profile_fields
 			'S_CONNECTION_CATEGORIES_MODE' => ($mode == 'connection_categories'),
 			'U_WANTED_UMBRELLA_TAGS_MODE' => $this->u_action . '&amp;mode=wanted_umbrella_tags',
 			'S_WANTED_UMBRELLA_TAGS_MODE' => ($mode == 'wanted_umbrella_tags'),
+			'U_REGISTRATION_STEPS_MODE' => $this->u_action . '&amp;mode=registration_steps',
+			'S_REGISTRATION_STEPS_MODE' => ($mode == 'registration_steps'),
 		));
 
 		if ($mode == 'sections')
@@ -99,6 +104,10 @@ class acp_profile_fields
 		else if ($mode == 'wanted_umbrella_tags')
 		{
 			$this->handle_wanted_umbrella_tags($action);
+		}
+		else if ($mode == 'registration_steps')
+		{
+			$this->handle_registration_steps($action);
 		}
 		else
 		{
@@ -1214,6 +1223,158 @@ class acp_profile_fields
 				'tag_id' => $tag_id,
 				'action' => 'delete',
 				'mode'   => 'wanted_umbrella_tags',
+			)));
+		}
+	}
+
+	// -------------------------------------------------------------------
+	// Registration wizard steps
+	// -------------------------------------------------------------------
+
+	private function handle_registration_steps($action)
+	{
+		global $db, $user, $template, $request;
+
+		$step_id = $request->variable('step_id', 0);
+
+		switch ($action)
+		{
+			case 'add':
+			case 'edit':
+				$this->registration_step_form($action, $step_id);
+				return;
+
+			case 'save':
+				$this->registration_step_save($step_id);
+				return;
+
+			case 'delete':
+				$this->registration_step_delete($step_id);
+				return;
+
+			case 'reorder_numeric':
+				$this->numeric_reorder($this->registration_steps_table, 'step_id');
+				trigger_error($user->lang('PROFILE_ORDER_UPDATED') . adm_back_link($this->u_action . '&amp;mode=registration_steps'));
+				return;
+		}
+
+		$sql = 'SELECT * FROM ' . $this->registration_steps_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('registration_steps', array(
+				'STEP_ID'     => $row['step_id'],
+				'TITLE'       => $row['title'],
+				'REQUIRE_ACK' => (bool) $row['require_acknowledgment'],
+				'SORT_ORDER'  => $row['sort_order'],
+				'U_EDIT'      => $this->u_action . "&amp;mode=registration_steps&amp;action=edit&amp;step_id={$row['step_id']}",
+				'U_DELETE'    => $this->u_action . "&amp;mode=registration_steps&amp;action=delete&amp;step_id={$row['step_id']}",
+			));
+		}
+		$db->sql_freeresult($result);
+
+		$template->assign_vars(array(
+			'U_ADD_REGISTRATION_STEP' => $this->u_action . '&amp;mode=registration_steps&amp;action=add',
+		));
+	}
+
+	private function registration_step_form($action, $step_id)
+	{
+		global $db, $template;
+
+		$step = array('title' => '', 'content' => '', 'require_acknowledgment' => 1);
+
+		if ($action == 'edit' && $step_id)
+		{
+			$sql = 'SELECT * FROM ' . $this->registration_steps_table . ' WHERE step_id = ' . (int) $step_id;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$row)
+			{
+				trigger_error('GEM_REGISTRATION_STEP_NOT_FOUND', E_USER_WARNING);
+			}
+			$step = $row;
+		}
+
+		$template->assign_vars(array(
+			'S_EDIT_REGISTRATION_STEP' => true,
+			'STEP_ID'     => $step_id,
+			'TITLE'       => $step['title'],
+			'CONTENT'     => $step['content'],
+			'REQUIRE_ACK' => (bool) $step['require_acknowledgment'],
+			'U_SAVE'      => $this->u_action . '&amp;mode=registration_steps&amp;action=save&amp;step_id=' . (int) $step_id,
+		));
+	}
+
+	private function registration_step_save($step_id)
+	{
+		global $db, $user, $request;
+
+		if (!check_form_key('acp_profile_fields'))
+		{
+			trigger_error('FORM_INVALID', E_USER_WARNING);
+		}
+
+		$title = $request->variable('title', '', true);
+		$content = $request->variable('content', '', true);
+		$require_ack = $request->variable('require_acknowledgment', 0);
+
+		if ($title === '')
+		{
+			trigger_error($user->lang('GEM_REGISTRATION_STEP_TITLE_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=registration_steps'), E_USER_WARNING);
+		}
+
+		$sql_ary = array(
+			'title'                  => $title,
+			'content'                => $content,
+			'require_acknowledgment' => $require_ack ? 1 : 0,
+		);
+
+		if ($step_id)
+		{
+			$sql = 'UPDATE ' . $this->registration_steps_table . ' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE step_id = ' . (int) $step_id;
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->registration_steps_table;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+			$sql_ary['sort_order'] = ((int) $row['max_order']) + 1;
+
+			$sql = 'INSERT INTO ' . $this->registration_steps_table . ' ' . $db->sql_build_array('INSERT', $sql_ary);
+			$db->sql_query($sql);
+		}
+
+		trigger_error($user->lang('GEM_REGISTRATION_STEP_SAVED') . adm_back_link($this->u_action . '&amp;mode=registration_steps'));
+	}
+
+	private function registration_step_delete($step_id)
+	{
+		global $db, $user;
+
+		if (!$step_id)
+		{
+			trigger_error('GEM_REGISTRATION_STEP_NOT_FOUND', E_USER_WARNING);
+		}
+
+		if (confirm_box(true))
+		{
+			$sql = 'DELETE FROM ' . $this->registration_steps_table . ' WHERE step_id = ' . (int) $step_id;
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_REGISTRATION_STEP_DELETED') . adm_back_link($this->u_action . '&amp;mode=registration_steps'));
+		}
+		else
+		{
+			confirm_box(false, 'GEM_REGISTRATION_STEP_DELETE_CONFIRM', build_hidden_fields(array(
+				'step_id' => $step_id,
+				'action'  => 'delete',
+				'mode'    => 'registration_steps',
 			)));
 		}
 	}

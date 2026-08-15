@@ -3,7 +3,7 @@
 <h1>{L_ACP_PROFILE_FIELDS}</h1>
 
 <p class="gem-mode-tabs">
-	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE and not S_WANTED_UMBRELLA_TAGS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE and not S_WANTED_UMBRELLA_TAGS_MODE and not S_REGISTRATION_STEPS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_SECTIONS_MODE}" class="gem-tab<!-- IF S_SECTIONS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
 	&nbsp;|&nbsp;
@@ -14,6 +14,8 @@
 	<a href="{U_CONNECTION_CATEGORIES_MODE}" class="gem-tab<!-- IF S_CONNECTION_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_CONNECTION_CATEGORIES}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_WANTED_UMBRELLA_TAGS_MODE}" class="gem-tab<!-- IF S_WANTED_UMBRELLA_TAGS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_WANTED_UMBRELLA_TAGS}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_REGISTRATION_STEPS_MODE}" class="gem-tab<!-- IF S_REGISTRATION_STEPS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_REGISTRATION_STEPS}</a>
 </p>
 
 <!-- IF S_SETTINGS_MODE -->
@@ -212,6 +214,67 @@
 			<!-- END wanted_umbrella_tags -->
 		</tbody>
 	</table>
+
+<!-- ELSEIF S_REGISTRATION_STEPS_MODE and S_EDIT_REGISTRATION_STEP -->
+	<!-- ============ REGISTRATION STEP ADD/EDIT FORM ============ -->
+	<form id="acp_registration_step_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_REGISTRATION_STEP_DETAILS}</legend>
+			<dl>
+				<dt><label for="title">{L_GEM_STEP_TITLE}</label></dt>
+				<dd><input type="text" id="title" name="title" value="{TITLE}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="content">{L_GEM_STEP_CONTENT}</label></dt>
+				<dd><textarea id="content" name="content" rows="10" cols="60">{CONTENT}</textarea>
+					<br /><span class="gem-hint">{L_GEM_STEP_CONTENT_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="require_acknowledgment">{L_GEM_REQUIRE_ACK}</label></dt>
+				<dd><input type="checkbox" id="require_acknowledgment" name="require_acknowledgment" value="1"<!-- IF REQUIRE_ACK --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_REQUIRE_ACK_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_REGISTRATION_STEPS_MODE -->
+	<!-- ============ REGISTRATION STEPS LIST ============ -->
+	<p><a href="{U_ADD_REGISTRATION_STEP}" class="button2">{L_GEM_ADD_REGISTRATION_STEP}</a></p>
+
+	<form id="acp_registration_steps_reorder" method="post" action="{U_ACTION}&amp;mode=registration_steps&amp;action=reorder_numeric">
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_STEP_TITLE}</th>
+				<th>{L_GEM_REQUIRE_ACK}</th>
+				<th>{L_PROFILE_SORT_ORDER}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN registration_steps -->
+			<tr>
+				<td>{registration_steps.TITLE}</td>
+				<td><!-- IF registration_steps.REQUIRE_ACK -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><input type="number" name="sort_order[{registration_steps.STEP_ID}]" value="{registration_steps.SORT_ORDER}" size="4" class="inputbox" /></td>
+				<td>
+					<a href="{registration_steps.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{registration_steps.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END registration_steps -->
+		</tbody>
+	</table>
+	<p class="submit-buttons">
+		<input type="submit" class="button1" value="{L_PROFILE_SAVE_ORDER}" />
+		{S_FORM_TOKEN}
+	</p>
+	</form>
 
 <!-- ELSEIF S_SECTIONS_MODE and S_EDIT_SECTION -->
 	<!-- ============ SECTION ADD/EDIT FORM ============ -->

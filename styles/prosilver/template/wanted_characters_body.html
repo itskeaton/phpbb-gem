@@ -1,0 +1,46 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_GEM_WANTED_CHARACTERS_TITLE}</h1>
+
+<form id="gem-wanted-filters" method="get" action="{U_ACTION}">
+	<fieldset>
+		<!-- BEGIN filters -->
+		<label for="filter_{filters.FIELD_ID}">{filters.LABEL}</label>
+		<select id="filter_{filters.FIELD_ID}" name="filter_{filters.FIELD_ID}">
+			<option value="">{L_GEM_ANY}</option>
+			<!-- BEGIN choices -->
+			<option value="{filters.choices.VALUE}"<!-- IF filters.choices.SELECTED --> selected="selected"<!-- ENDIF -->>{filters.choices.LABEL}</option>
+			<!-- END choices -->
+		</select>
+		<!-- END filters -->
+		<input type="submit" class="button1" value="{L_GEM_APPLY_FILTERS}" />
+	</fieldset>
+</form>
+
+<div id="gem-wanted-grid">
+	<!-- BEGIN wanted_ads -->
+	<div class="gem-wanted-tile">
+		<!-- IF wanted_ads.IMAGE_URL -->
+		<img src="{wanted_ads.IMAGE_URL}" alt="{wanted_ads.CHAR_NAME}" style="width: 160px; height: 160px; border-radius: 100%; object-fit: cover;" />
+		<!-- ENDIF -->
+		<h3>
+			{wanted_ads.CHAR_NAME}
+			<!-- IF wanted_ads.IS_RESERVED --> <span class="gem-reserved-badge">{L_GEM_RESERVED}</span><!-- ENDIF -->
+		</h3>
+		<dl>
+			<!-- BEGIN details -->
+			<dt>{wanted_ads.details.LABEL}</dt>
+			<dd>{wanted_ads.details.VALUE}</dd>
+			<!-- END details -->
+		</dl>
+		<div class="gem-wanted-blurb">{wanted_ads.BLURB}</div>
+		<p class="gensmall">{L_GEM_CONNECTED_TO} <a href="{wanted_ads.U_CONNECTED_TO}">{wanted_ads.CONNECTED_TO}</a></p>
+	</div>
+	<!-- END wanted_ads -->
+</div>
+
+<!-- IF not S_HAS_RESULTS -->
+	<p class="gensmall">{L_GEM_NO_WANTED_ADS}</p>
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->

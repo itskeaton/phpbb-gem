@@ -30,6 +30,8 @@ class acp_profile_fields
 	private $ticket_category_fields_table;
 	/** @var string */
 	private $connection_categories_table;
+	/** @var string */
+	private $wanted_umbrella_tags_table;
 
 	private $allowed_field_types = array('text', 'textarea', 'select', 'multiselect', 'date', 'url', 'checkbox', 'image', 'songlist');
 	private $allowed_applies_to = array(1 => 'PROFILE_APPLIES_PLAYER', 2 => 'PROFILE_APPLIES_CHARACTER', 3 => 'PROFILE_APPLIES_BOTH');
@@ -49,6 +51,7 @@ class acp_profile_fields
 		$this->ticket_categories_table = $table_prefix . 'ticket_categories';
 		$this->ticket_category_fields_table = $table_prefix . 'ticket_category_fields';
 		$this->connection_categories_table = $table_prefix . 'connection_categories';
+		$this->wanted_umbrella_tags_table = $table_prefix . 'wanted_umbrella_tags';
 
 		$action = $request->variable('action', 'list');
 
@@ -73,6 +76,8 @@ class acp_profile_fields
 			'S_TICKET_CATEGORIES_MODE' => ($mode == 'ticket_categories'),
 			'U_CONNECTION_CATEGORIES_MODE' => $this->u_action . '&amp;mode=connection_categories',
 			'S_CONNECTION_CATEGORIES_MODE' => ($mode == 'connection_categories'),
+			'U_WANTED_UMBRELLA_TAGS_MODE' => $this->u_action . '&amp;mode=wanted_umbrella_tags',
+			'S_WANTED_UMBRELLA_TAGS_MODE' => ($mode == 'wanted_umbrella_tags'),
 		));
 
 		if ($mode == 'sections')
@@ -90,6 +95,10 @@ class acp_profile_fields
 		else if ($mode == 'connection_categories')
 		{
 			$this->handle_connection_categories($action);
+		}
+		else if ($mode == 'wanted_umbrella_tags')
+		{
+			$this->handle_wanted_umbrella_tags($action);
 		}
 		else
 		{
@@ -116,11 +125,13 @@ class acp_profile_fields
 			$max_characters   = $request->variable('gem_max_characters', 0);
 			$self_unarchive   = $request->variable('gem_self_unarchive', 0);
 			$gallery_quota    = $request->variable('gem_gallery_quota', 0);
+			$wanted_ad_cap    = $request->variable('gem_wanted_ad_cap', 10);
 
 			$config->set('gem_require_approval', $require_approval ? 1 : 0);
 			$config->set('gem_max_characters', max(0, $max_characters));
 			$config->set('gem_self_unarchive', $self_unarchive ? 1 : 0);
 			$config->set('gem_gallery_quota', max(0, $gallery_quota));
+			$config->set('gem_wanted_ad_cap', max(0, $wanted_ad_cap));
 
 			trigger_error($user->lang('ACP_GEM_SETTINGS_SAVED') . adm_back_link($this->u_action . '&amp;mode=settings'));
 		}
@@ -131,6 +142,7 @@ class acp_profile_fields
 			'GEM_MAX_CHARACTERS'    => (int) $config['gem_max_characters'],
 			'GEM_SELF_UNARCHIVE'    => (bool) $config['gem_self_unarchive'],
 			'GEM_GALLERY_QUOTA'     => (int) $config['gem_gallery_quota'],
+			'GEM_WANTED_AD_CAP'     => (int) $config['gem_wanted_ad_cap'],
 		));
 	}
 
@@ -355,6 +367,8 @@ class acp_profile_fields
 				'SEARCHABLE'    => (bool) $row['searchable'],
 				'SHOW_ON_ROSTER' => (bool) $row['show_on_roster'],
 				'SHOW_IN_SHOWCASE' => (bool) $row['show_in_showcase'],
+				'WANTED_CHARACTER_FIELD' => (bool) $row['wanted_character_field'],
+				'WANTED_PLOT_FIELD'      => (bool) $row['wanted_plot_field'],
 				'SORT_ORDER'    => $row['sort_order'],
 				'U_EDIT'        => $this->u_action . "&amp;mode=fields&amp;action=edit&amp;field_id={$row['field_id']}",
 				'U_DELETE'      => $this->u_action . "&amp;mode=fields&amp;action=delete&amp;field_id={$row['field_id']}",
@@ -385,6 +399,8 @@ class acp_profile_fields
 			'searchable'           => 0,
 			'show_on_roster'       => 0,
 			'show_in_showcase'     => 0,
+			'wanted_character_field' => 0,
+			'wanted_plot_field'      => 0,
 		);
 
 		if ($action == 'edit' && $field_id)
@@ -415,6 +431,8 @@ class acp_profile_fields
 			'SEARCHABLE'            => (bool) $field['searchable'],
 			'SHOW_ON_ROSTER'        => (bool) $field['show_on_roster'],
 			'SHOW_IN_SHOWCASE'      => (bool) $field['show_in_showcase'],
+			'WANTED_CHARACTER_FIELD' => (bool) $field['wanted_character_field'],
+			'WANTED_PLOT_FIELD'      => (bool) $field['wanted_plot_field'],
 			'U_SAVE'                => $this->u_action . '&amp;mode=fields&amp;action=save&amp;field_id=' . (int) $field_id,
 		));
 
@@ -444,6 +462,8 @@ class acp_profile_fields
 		$searchable  = $request->variable('searchable', 0);
 		$show_on_roster = $request->variable('show_on_roster', 0);
 		$show_in_showcase = $request->variable('show_in_showcase', 0);
+		$wanted_character_field = $request->variable('wanted_character_field', 0);
+		$wanted_plot_field = $request->variable('wanted_plot_field', 0);
 
 		if ($label === '')
 		{
@@ -497,6 +517,8 @@ class acp_profile_fields
 			'searchable'           => $searchable ? 1 : 0,
 			'show_on_roster'       => $show_on_roster ? 1 : 0,
 			'show_in_showcase'     => $show_in_showcase ? 1 : 0,
+			'wanted_character_field' => $wanted_character_field ? 1 : 0,
+			'wanted_plot_field'      => $wanted_plot_field ? 1 : 0,
 		);
 
 		if ($field_id)
@@ -1052,6 +1074,146 @@ class acp_profile_fields
 				'category_id' => $category_id,
 				'action'      => 'delete',
 				'mode'        => 'connection_categories',
+			)));
+		}
+	}
+
+	// -------------------------------------------------------------------
+	// Wanted Plots umbrella tags
+	// -------------------------------------------------------------------
+
+	private function handle_wanted_umbrella_tags($action)
+	{
+		global $db, $user, $template, $request;
+
+		$tag_id = $request->variable('tag_id', 0);
+
+		switch ($action)
+		{
+			case 'add':
+			case 'edit':
+				$this->wanted_umbrella_tag_form($action, $tag_id);
+				return;
+
+			case 'save':
+				$this->wanted_umbrella_tag_save($tag_id);
+				return;
+
+			case 'delete':
+				$this->wanted_umbrella_tag_delete($tag_id);
+				return;
+		}
+
+		$sql = 'SELECT * FROM ' . $this->wanted_umbrella_tags_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('wanted_umbrella_tags', array(
+				'TAG_ID'   => $row['tag_id'],
+				'TAG_NAME' => $row['tag_name'],
+				'U_EDIT'   => $this->u_action . "&amp;mode=wanted_umbrella_tags&amp;action=edit&amp;tag_id={$row['tag_id']}",
+				'U_DELETE' => $this->u_action . "&amp;mode=wanted_umbrella_tags&amp;action=delete&amp;tag_id={$row['tag_id']}",
+			));
+		}
+		$db->sql_freeresult($result);
+
+		$template->assign_vars(array(
+			'U_ADD_WANTED_UMBRELLA_TAG' => $this->u_action . '&amp;mode=wanted_umbrella_tags&amp;action=add',
+		));
+	}
+
+	private function wanted_umbrella_tag_form($action, $tag_id)
+	{
+		global $db, $template;
+
+		$tag_name = '';
+
+		if ($action == 'edit' && $tag_id)
+		{
+			$sql = 'SELECT * FROM ' . $this->wanted_umbrella_tags_table . ' WHERE tag_id = ' . (int) $tag_id;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$row)
+			{
+				trigger_error('GEM_WANTED_TAG_NOT_FOUND', E_USER_WARNING);
+			}
+			$tag_name = $row['tag_name'];
+		}
+
+		$template->assign_vars(array(
+			'S_EDIT_WANTED_UMBRELLA_TAG' => true,
+			'TAG_ID'   => $tag_id,
+			'TAG_NAME' => $tag_name,
+			'U_SAVE'   => $this->u_action . '&amp;mode=wanted_umbrella_tags&amp;action=save&amp;tag_id=' . (int) $tag_id,
+		));
+	}
+
+	private function wanted_umbrella_tag_save($tag_id)
+	{
+		global $db, $user, $request;
+
+		if (!check_form_key('acp_profile_fields'))
+		{
+			trigger_error('FORM_INVALID', E_USER_WARNING);
+		}
+
+		$tag_name = $request->variable('tag_name', '', true);
+
+		if ($tag_name === '')
+		{
+			trigger_error($user->lang('GEM_CATEGORY_NAME_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=wanted_umbrella_tags'), E_USER_WARNING);
+		}
+
+		if ($tag_id)
+		{
+			$sql = 'UPDATE ' . $this->wanted_umbrella_tags_table . " SET tag_name = '" . $db->sql_escape($tag_name) . "'
+					WHERE tag_id = " . (int) $tag_id;
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->wanted_umbrella_tags_table;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			$sql = 'INSERT INTO ' . $this->wanted_umbrella_tags_table . ' ' . $db->sql_build_array('INSERT', array(
+				'tag_name'   => $tag_name,
+				'sort_order' => ((int) $row['max_order']) + 1,
+			));
+			$db->sql_query($sql);
+		}
+
+		trigger_error($user->lang('GEM_WANTED_TAG_SAVED') . adm_back_link($this->u_action . '&amp;mode=wanted_umbrella_tags'));
+	}
+
+	private function wanted_umbrella_tag_delete($tag_id)
+	{
+		global $db, $user, $table_prefix;
+
+		if (!$tag_id)
+		{
+			trigger_error('GEM_WANTED_TAG_NOT_FOUND', E_USER_WARNING);
+		}
+
+		if (confirm_box(true))
+		{
+			$sql = 'DELETE FROM ' . $this->wanted_umbrella_tags_table . ' WHERE tag_id = ' . (int) $tag_id;
+			$db->sql_query($sql);
+
+			$sql = 'DELETE FROM ' . $table_prefix . 'wanted_plot_umbrella_map WHERE tag_id = ' . (int) $tag_id;
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_WANTED_TAG_DELETED') . adm_back_link($this->u_action . '&amp;mode=wanted_umbrella_tags'));
+		}
+		else
+		{
+			confirm_box(false, 'GEM_WANTED_TAG_DELETE_CONFIRM', build_hidden_fields(array(
+				'tag_id' => $tag_id,
+				'action' => 'delete',
+				'mode'   => 'wanted_umbrella_tags',
 			)));
 		}
 	}

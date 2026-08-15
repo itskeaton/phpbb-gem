@@ -1,0 +1,183 @@
+<!-- INCLUDE overall_header.html -->
+
+<style type="text/css">
+	/* ============ PLOT AD CARDS (book-cover flip design) ============
+	   Kept from TGG's version since this IS the feature - the 3D flip is
+	   pure CSS, no JS needed. Theme var() references replaced with
+	   generic fallback colors so this looks reasonable on a fresh
+	   install; override these to match your own theme. */
+
+	#gem-wanted-plots-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px 0; }
+
+	.plot-ad__card {
+		position: relative;
+		width: 300px;
+		height: 420px;
+		cursor: pointer;
+		transform-style: preserve-3d;
+	}
+
+	.plot-ad__pages {
+		position: absolute;
+		inset: 0;
+		border-radius: 4px 8px 8px 4px;
+		background: #f5efe0;
+		padding: 2.4rem 1.6rem 2.4rem 2.6rem;
+		box-shadow: inset 18px 0 30px -18px rgba(0,0,0,0.4);
+		display: flex;
+		flex-direction: column;
+		color: #3a2e1f;
+		margin-left: 1px;
+	}
+
+	.plot-ad__pages .inner {
+		overflow: auto;
+		padding-right: 5px;
+		height: 348px;
+	}
+
+	.plot-ad__chapter {
+		font-size: 0.8rem;
+		letter-spacing: 0.15em;
+		text-transform: uppercase;
+		color: #9a7b4f;
+		margin-bottom: 1rem;
+	}
+
+	.plot-ad__text {
+		font-size: 1rem;
+		line-height: 1.6;
+		color: #5a4a36;
+	}
+
+	.plot-ad__cover {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		border-radius: 4px 8px 8px 4px;
+		transform-origin: left center;
+		transform: rotateY(0deg);
+		transition: transform 0.9s cubic-bezier(0.65,0,0.35,1), box-shadow 0.9s ease;
+		transform-style: preserve-3d;
+		box-shadow: 6px 6px 24px rgba(0,0,0,0.5);
+	}
+
+	.plot-ad__card:hover .plot-ad__cover {
+		transform: rotateY(-145deg);
+		box-shadow: -10px 6px 30px rgba(0,0,0,0.4);
+	}
+
+	.plot-ad__cover-front, .plot-ad__cover-back {
+		position: absolute;
+		inset: 0;
+		border-radius: 4px 8px 8px 4px;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
+	.plot-ad__cover-front {
+		padding: 0.8rem 2rem 1.6rem 2rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		color: #e8d8b8;
+		border-left: 6px solid #2e0f17;
+		background: linear-gradient(160deg, rgba(107,39,55,0.6), rgba(64,21,32,0.95));
+	}
+
+	.plot-ad__cover-back { background: #2e0f17; }
+
+	.plot-ad__cover-title { font-size: 1.3rem; font-weight: bold; text-align: center; margin-top: 30%; }
+	.plot-ad__author { font-style: italic; font-size: 0.95rem; color: #d8c3a0; text-align: center; }
+	.plot-ad__author a { text-decoration: none; color: #d8c3a0 !important; }
+
+	@media (prefers-reduced-motion: reduce) { .plot-ad__cover { transition: none !important; } }
+
+	.plot-ad-bg {
+		position: absolute; top: 0; right: 0; height: 420px; width: 300px;
+		border-radius: 8px; filter: grayscale(60%);
+		background-size: cover; background-position: center; background-repeat: no-repeat;
+	}
+
+	.plot-blurb { line-height: 1.3; text-align: center; font-size: 15px; margin-bottom: 8px; }
+
+	.plot-tag-row { text-align: center; margin: 8px 0; }
+	.plot-adult-badge { background: #bc2a4d; color: #fff; }
+	.plot-tag-chip {
+		display: inline-block; font-size: 10px; text-transform: uppercase;
+		letter-spacing: 1px; padding: 3px 8px; margin: 2px; border-radius: 10px;
+	}
+	.plot-tag-chip.umbrella { background: #b8860b; color: #000; }
+	.plot-tag-chip.specific { background: #3a2e1f; color: #e8d8b8; border: 1px solid #b8860b; }
+
+	.plot-ribbon {
+		display: inline-block; padding: 4px 12px; background: #8d1d18; color: #f0dfa8;
+		font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;
+	}
+	.plot-ribbon a { color: #f0dfa8; text-decoration: none; }
+</style>
+
+<h1>{L_GEM_WANTED_PLOTS_TITLE}</h1>
+
+<form id="gem-wanted-plots-filters" method="get" action="{U_ACTION}">
+	<fieldset>
+		<legend>{L_GEM_UMBRELLA_TAGS}</legend>
+		<!-- BEGIN umbrella_filter_options -->
+		<label><input type="checkbox" name="umbrella[]" value="{umbrella_filter_options.TAG_ID}"<!-- IF umbrella_filter_options.CHECKED --> checked="checked"<!-- ENDIF --> /> {umbrella_filter_options.TAG_NAME}</label>
+		<!-- END umbrella_filter_options -->
+	</fieldset>
+	<fieldset>
+		<legend>{L_GEM_SPECIFIC_TAGS}</legend>
+		<!-- BEGIN specific_filter_options -->
+		<label><input type="checkbox" name="tag[]" value="{specific_filter_options.TAG_ID}"<!-- IF specific_filter_options.CHECKED --> checked="checked"<!-- ENDIF --> /> {specific_filter_options.TAG_NAME}</label>
+		<!-- END specific_filter_options -->
+	</fieldset>
+	<label><input type="checkbox" name="hide_adult" value="1"<!-- IF S_HIDE_ADULT --> checked="checked"<!-- ENDIF --> /> {L_GEM_HIDE_ADULT}</label>
+	<input type="submit" class="button1" value="{L_GEM_APPLY_FILTERS}" />
+</form>
+
+<div id="gem-wanted-plots-grid">
+	<!-- BEGIN plot_ads -->
+	<div>
+		<article class="plot-ad__card">
+			<div class="plot-ad__pages">
+				<div class="inner">
+					<div class="plot-ad__chapter plot-tag-row">
+						<!-- BEGIN tag_display -->
+						<span class="plot-tag-chip specific">{plot_ads.tag_display.TAG_NAME}</span>
+						<!-- END tag_display -->
+					</div>
+					<div class="plot-blurb">{plot_ads.TEASER}</div>
+					<hr />
+					<p class="plot-ad__text">{plot_ads.BLURB}</p>
+				</div>
+			</div>
+			<div class="plot-ad__cover">
+				<div class="plot-ad-bg" style="background-image: url('{plot_ads.IMAGE_URL}');"></div>
+				<div class="plot-ad__cover-front">
+					<div class="plot-tag-row">
+						<!-- BEGIN umbrella_display -->
+						<span class="plot-tag-chip umbrella">{plot_ads.umbrella_display.TAG_NAME}</span>
+						<!-- END umbrella_display -->
+						<!-- IF plot_ads.IS_ADULT --><span class="plot-tag-chip plot-adult-badge">{L_GEM_ADULT}</span><!-- ENDIF -->
+					</div>
+					<div>
+						<div class="plot-ad__cover-title">{plot_ads.TITLE}</div>
+						<div class="plot-ad__author">{L_GEM_REQUESTED_BY} <a href="{plot_ads.U_AUTHOR}">{plot_ads.AUTHOR_NAME}</a></div>
+					</div>
+				</div>
+				<div class="plot-ad__cover-back"></div>
+			</div>
+		</article>
+		<!-- IF plot_ads.LINKED_CHAR_NAME -->
+		<div class="plot-ribbon">{L_GEM_TIED_TO} <a href="{plot_ads.U_LINKED_CHAR}">{plot_ads.LINKED_CHAR_NAME}</a></div>
+		<!-- ENDIF -->
+	</div>
+	<!-- END plot_ads -->
+</div>
+
+<!-- IF not S_HAS_RESULTS -->
+	<p class="gensmall">{L_GEM_NO_WANTED_PLOTS}</p>
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->

@@ -1,0 +1,219 @@
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{L_UCP_WANTED_MANAGE}</h2>
+
+<!-- IF S_CHAR_AD_FORM -->
+
+	<form id="ucp_wanted_char_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_WANTED_AD} &raquo; {CHARACTER_NAME}</legend>
+			<dl>
+				<dt><label for="char_name">{L_GEM_WANTED_CHAR_NAME}</label></dt>
+				<dd><input type="text" id="char_name" name="char_name" value="{AD_CHAR_NAME}" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="image_url">{L_GEM_IMAGE_URL}</label></dt>
+				<dd><input type="text" id="image_url" name="image_url" value="{IMAGE_URL}" class="inputbox" placeholder="https://..." /></dd>
+			</dl>
+			<dl>
+				<dt><label for="blurb">{L_GEM_BLURB}</label></dt>
+				<dd><textarea id="blurb" name="blurb" rows="6" cols="45">{BLURB}</textarea></dd>
+			</dl>
+			<dl>
+				<dt><label for="is_reserved">{L_GEM_IS_RESERVED}</label></dt>
+				<dd><input type="checkbox" id="is_reserved" name="is_reserved" value="1"<!-- IF IS_RESERVED --> checked="checked"<!-- ENDIF --> /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ad_status">{L_GEM_VISIBILITY}</label></dt>
+				<dd>
+					<select id="ad_status" name="ad_status">
+						<option value="1"<!-- IF AD_STATUS -->  selected="selected"<!-- ENDIF -->>{L_GEM_VISIBLE}</option>
+						<option value="0"<!-- IF not AD_STATUS --> selected="selected"<!-- ENDIF -->>{L_GEM_HIDDEN}</option>
+					</select>
+				</dd>
+			</dl>
+		</fieldset>
+
+		<!-- BEGIN dynamic_fields -->
+		<fieldset>
+			<dl>
+				<dt><label for="field_{dynamic_fields.FIELD_ID}">{dynamic_fields.LABEL}<!-- IF dynamic_fields.REQUIRED --> *<!-- ENDIF --></label></dt>
+				<dd>
+					<!-- IF dynamic_fields.S_TEXT -->
+						<input type="text" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_TEXTAREA -->
+						<textarea id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" rows="3" cols="45">{dynamic_fields.VALUE}</textarea>
+					<!-- ELSEIF dynamic_fields.S_URL -->
+						<input type="url" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_DATE -->
+						<input type="date" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_CHECKBOX -->
+						<input type="checkbox" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="1"<!-- IF dynamic_fields.CHECKED --> checked="checked"<!-- ENDIF --> />
+					<!-- ELSEIF dynamic_fields.S_SELECT -->
+						<select id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}">
+							<option value=""></option>
+							<!-- BEGIN choices -->
+							<option value="{dynamic_fields.choices.VALUE}"<!-- IF dynamic_fields.choices.SELECTED --> selected="selected"<!-- ENDIF -->>{dynamic_fields.choices.LABEL}</option>
+							<!-- END choices -->
+						</select>
+					<!-- ENDIF -->
+				</dd>
+			</dl>
+		</fieldset>
+		<!-- END dynamic_fields -->
+
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_PLOT_FORM -->
+
+	<form id="ucp_wanted_plot_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_WANTED_PLOT} &raquo; {CHARACTER_NAME}</legend>
+			<dl>
+				<dt><label for="title">{L_GEM_PLOT_TITLE}</label></dt>
+				<dd><input type="text" id="title" name="title" value="{TITLE}" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="teaser">{L_GEM_PLOT_TEASER}</label></dt>
+				<dd><textarea id="teaser" name="teaser" rows="2" maxlength="300">{TEASER}</textarea></dd>
+			</dl>
+			<dl>
+				<dt><label for="linked_ad_id">{L_GEM_LINK_TO_CHARACTER}</label></dt>
+				<dd>
+					<select id="linked_ad_id" name="linked_ad_id">
+						<option value="0">{L_GEM_STANDALONE_PLOT}</option>
+						<!-- BEGIN own_ads -->
+						<option value="{own_ads.AD_ID}"<!-- IF own_ads.SELECTED --> selected="selected"<!-- ENDIF -->>{own_ads.CHAR_NAME}</option>
+						<!-- END own_ads -->
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="image_url">{L_GEM_PLOT_IMAGE_OVERRIDE}</label></dt>
+				<dd><input type="text" id="image_url" name="image_url" value="{IMAGE_URL}" class="inputbox" placeholder="https://..." />
+					<br /><span class="gensmall">{L_GEM_PLOT_IMAGE_OVERRIDE_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label>{L_GEM_UMBRELLA_TAGS}</label></dt>
+				<dd>
+					<!-- BEGIN umbrella_options -->
+					<label><input type="checkbox" name="umbrella_tags[]" value="{umbrella_options.TAG_ID}"<!-- IF umbrella_options.CHECKED --> checked="checked"<!-- ENDIF --> /> {umbrella_options.TAG_NAME}</label>
+					<!-- END umbrella_options -->
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="specific_tags">{L_GEM_SPECIFIC_TAGS}</label></dt>
+				<dd>
+					<input type="text" id="specific_tags" name="specific_tags" value="{SPECIFIC_TAGS}" class="inputbox" list="specific-tags-datalist" />
+					<datalist id="specific-tags-datalist">
+						<!-- BEGIN existing_tags -->
+						<option value="{existing_tags.TAG_NAME}">
+						<!-- END existing_tags -->
+					</datalist>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="is_adult_content">{L_GEM_ADULT_CONTENT}</label></dt>
+				<dd><label><input type="checkbox" id="is_adult_content" name="is_adult_content" value="1"<!-- IF IS_ADULT --> checked="checked"<!-- ENDIF --> /> {L_GEM_ADULT_CONTENT_CONFIRM}</label></dd>
+			</dl>
+			<dl>
+				<dt><label for="blurb">{L_GEM_BLURB}</label></dt>
+				<dd><textarea id="blurb" name="blurb" rows="6" cols="45">{BLURB}</textarea></dd>
+			</dl>
+			<dl>
+				<dt><label for="ad_status">{L_GEM_VISIBILITY}</label></dt>
+				<dd>
+					<select id="ad_status" name="ad_status">
+						<option value="1"<!-- IF AD_STATUS --> selected="selected"<!-- ENDIF -->>{L_GEM_VISIBLE}</option>
+						<option value="0"<!-- IF not AD_STATUS --> selected="selected"<!-- ENDIF -->>{L_GEM_HIDDEN}</option>
+					</select>
+				</dd>
+			</dl>
+		</fieldset>
+
+		<!-- BEGIN dynamic_fields -->
+		<fieldset>
+			<dl>
+				<dt><label for="field_{dynamic_fields.FIELD_ID}">{dynamic_fields.LABEL}<!-- IF dynamic_fields.REQUIRED --> *<!-- ENDIF --></label></dt>
+				<dd>
+					<!-- IF dynamic_fields.S_TEXT -->
+						<input type="text" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_TEXTAREA -->
+						<textarea id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" rows="3" cols="45">{dynamic_fields.VALUE}</textarea>
+					<!-- ELSEIF dynamic_fields.S_URL -->
+						<input type="url" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_DATE -->
+						<input type="date" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="{dynamic_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF dynamic_fields.S_CHECKBOX -->
+						<input type="checkbox" id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}" value="1"<!-- IF dynamic_fields.CHECKED --> checked="checked"<!-- ENDIF --> />
+					<!-- ELSEIF dynamic_fields.S_SELECT -->
+						<select id="field_{dynamic_fields.FIELD_ID}" name="field_{dynamic_fields.FIELD_ID}">
+							<option value=""></option>
+							<!-- BEGIN choices -->
+							<option value="{dynamic_fields.choices.VALUE}"<!-- IF dynamic_fields.choices.SELECTED --> selected="selected"<!-- ENDIF -->>{dynamic_fields.choices.LABEL}</option>
+							<!-- END choices -->
+						</select>
+					<!-- ENDIF -->
+				</dd>
+			</dl>
+		</fieldset>
+		<!-- END dynamic_fields -->
+
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSE -->
+
+	<!-- BEGIN characters -->
+	<h3>{characters.CHARACTER_NAME}</h3>
+	<p>
+		<!-- IF characters.S_CAP_REACHED -->
+			<span class="gensmall">{L_GEM_CAP_REACHED_NOTICE}</span>
+		<!-- ELSE -->
+			<a href="{characters.U_ADD_CHAR_AD}" class="button2">{L_GEM_ADD_WANTED_AD}</a>
+		<!-- ENDIF -->
+		&nbsp;
+		<a href="{characters.U_ADD_PLOT}" class="button2">{L_GEM_ADD_WANTED_PLOT}</a>
+	</p>
+
+	<!-- IF .ads -->
+	<table cellspacing="1">
+		<thead><tr><th>{L_GEM_WANTED_CHAR_NAME}</th><th>{L_GEM_VISIBILITY}</th><th>{L_ACTIONS}</th></tr></thead>
+		<tbody>
+			<!-- BEGIN ads -->
+			<tr>
+				<td>{characters.ads.CHAR_NAME}</td>
+				<td><!-- IF characters.ads.VISIBLE -->{L_GEM_VISIBLE}<!-- ELSE -->{L_GEM_HIDDEN}<!-- ENDIF --></td>
+				<td><a href="{characters.ads.U_EDIT}">{L_EDIT}</a> | <a href="{characters.ads.U_DELETE}">{L_DELETE}</a></td>
+			</tr>
+			<!-- END ads -->
+		</tbody>
+	</table>
+	<!-- ENDIF -->
+
+	<!-- IF .plots -->
+	<table cellspacing="1">
+		<thead><tr><th>{L_GEM_PLOT_TITLE}</th><th>{L_GEM_VISIBILITY}</th><th>{L_ACTIONS}</th></tr></thead>
+		<tbody>
+			<!-- BEGIN plots -->
+			<tr>
+				<td>{characters.plots.TITLE}</td>
+				<td><!-- IF characters.plots.VISIBLE -->{L_GEM_VISIBLE}<!-- ELSE -->{L_GEM_HIDDEN}<!-- ENDIF --></td>
+				<td><a href="{characters.plots.U_EDIT}">{L_EDIT}</a> | <a href="{characters.plots.U_DELETE}">{L_DELETE}</a></td>
+			</tr>
+			<!-- END plots -->
+		</tbody>
+	</table>
+	<!-- ENDIF -->
+	<!-- END characters -->
+
+<!-- ENDIF -->
+
+<!-- INCLUDE ucp_footer.html -->

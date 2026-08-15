@@ -109,4 +109,19 @@ $lang = array_merge($lang, array(
 	'GEM_CONNECTION_CATEGORY_DELETED' => 'Category deleted.',
 	'GEM_CONNECTION_CATEGORY_DELETE_CONFIRM' => 'Delete this connection category? Existing connections using it are not deleted, but will lose their category association.',
 	'GEM_CONNECTION_CATEGORY_NOT_FOUND' => 'That category could not be found.',
+
+	'GEM_WANTED_AD_CAP'          => 'Max wanted-character ads per character',
+	'GEM_WANTED_AD_CAP_HINT'     => '0 = unlimited. No cap applies to Wanted Plots.',
+	'GEM_WANTED_CHARACTER_FIELD' => 'Show on Wanted Character ads',
+	'GEM_WANTED_CHARACTER_FIELD_HINT' => 'Appears on the Wanted Character submission form and public listing.',
+	'GEM_WANTED_PLOT_FIELD'      => 'Show on Wanted Plot ads',
+	'GEM_WANTED_PLOT_FIELD_HINT' => 'Appears on the Wanted Plot submission form and public listing.',
+
+	'ACP_WANTED_UMBRELLA_TAGS'   => 'Wanted Plot Tags',
+	'GEM_ADD_WANTED_UMBRELLA_TAG' => 'Add tag',
+	'GEM_WANTED_TAG_DETAILS'     => 'Tag details',
+	'GEM_WANTED_TAG_SAVED'       => 'Tag saved.',
+	'GEM_WANTED_TAG_DELETED'     => 'Tag deleted.',
+	'GEM_WANTED_TAG_DELETE_CONFIRM' => 'Delete this umbrella tag? Existing plots using it are not deleted, but will lose this tag.',
+	'GEM_WANTED_TAG_NOT_FOUND'   => 'That tag could not be found.',
 ));

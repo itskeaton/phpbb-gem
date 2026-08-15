@@ -37,6 +37,11 @@ class acp_profile_fields_info
 					'auth'  => 'acl_a_board',
 					'cat'   => array('ACP_CAT_GEM'),
 				),
+				'wanted_umbrella_tags' => array(
+					'title' => 'ACP_WANTED_UMBRELLA_TAGS',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
 			),
 		);
 	}

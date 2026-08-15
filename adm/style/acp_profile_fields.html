@@ -3,7 +3,7 @@
 <h1>{L_ACP_PROFILE_FIELDS}</h1>
 
 <p class="gem-mode-tabs">
-	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE and not S_WANTED_UMBRELLA_TAGS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_SECTIONS_MODE}" class="gem-tab<!-- IF S_SECTIONS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
 	&nbsp;|&nbsp;
@@ -12,6 +12,8 @@
 	<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab<!-- IF S_TICKET_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_TICKET_CATEGORIES}</a>
 	&nbsp;|&nbsp;
 	<a href="{U_CONNECTION_CATEGORIES_MODE}" class="gem-tab<!-- IF S_CONNECTION_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_CONNECTION_CATEGORIES}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_WANTED_UMBRELLA_TAGS_MODE}" class="gem-tab<!-- IF S_WANTED_UMBRELLA_TAGS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_WANTED_UMBRELLA_TAGS}</a>
 </p>
 
 <!-- IF S_SETTINGS_MODE -->
@@ -37,6 +39,11 @@
 				<dt><label for="gem_gallery_quota">{L_GEM_GALLERY_QUOTA}</label></dt>
 				<dd><input type="number" id="gem_gallery_quota" name="gem_gallery_quota" value="{GEM_GALLERY_QUOTA}" min="0" size="4" class="inputbox" />
 					<br /><span class="gem-hint">{L_GEM_GALLERY_QUOTA_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="gem_wanted_ad_cap">{L_GEM_WANTED_AD_CAP}</label></dt>
+				<dd><input type="number" id="gem_wanted_ad_cap" name="gem_wanted_ad_cap" value="{GEM_WANTED_AD_CAP}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_WANTED_AD_CAP_HINT}</span></dd>
 			</dl>
 		</fieldset>
 		<p class="submit-buttons">
@@ -162,6 +169,47 @@
 				</td>
 			</tr>
 			<!-- END connection_categories -->
+		</tbody>
+	</table>
+
+<!-- ELSEIF S_WANTED_UMBRELLA_TAGS_MODE and S_EDIT_WANTED_UMBRELLA_TAG -->
+	<!-- ============ WANTED UMBRELLA TAG ADD/EDIT FORM ============ -->
+	<form id="acp_wanted_tag_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_WANTED_TAG_DETAILS}</legend>
+			<dl>
+				<dt><label for="tag_name">{L_GEM_CATEGORY_NAME}</label></dt>
+				<dd><input type="text" id="tag_name" name="tag_name" value="{TAG_NAME}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_WANTED_UMBRELLA_TAGS_MODE -->
+	<!-- ============ WANTED UMBRELLA TAGS LIST ============ -->
+	<p><a href="{U_ADD_WANTED_UMBRELLA_TAG}" class="button2">{L_GEM_ADD_WANTED_UMBRELLA_TAG}</a></p>
+
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_CATEGORY_NAME}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN wanted_umbrella_tags -->
+			<tr>
+				<td>{wanted_umbrella_tags.TAG_NAME}</td>
+				<td>
+					<a href="{wanted_umbrella_tags.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{wanted_umbrella_tags.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END wanted_umbrella_tags -->
 		</tbody>
 	</table>
 
@@ -300,6 +348,16 @@
 				<dd><input type="checkbox" id="show_in_showcase" name="show_in_showcase" value="1"<!-- IF SHOW_IN_SHOWCASE --> checked="checked"<!-- ENDIF --> />
 					<br /><span class="gem-hint">{L_PROFILE_SHOW_IN_SHOWCASE_HINT}</span></dd>
 			</dl>
+			<dl>
+				<dt><label for="wanted_character_field">{L_GEM_WANTED_CHARACTER_FIELD}</label></dt>
+				<dd><input type="checkbox" id="wanted_character_field" name="wanted_character_field" value="1"<!-- IF WANTED_CHARACTER_FIELD --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_WANTED_CHARACTER_FIELD_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="wanted_plot_field">{L_GEM_WANTED_PLOT_FIELD}</label></dt>
+				<dd><input type="checkbox" id="wanted_plot_field" name="wanted_plot_field" value="1"<!-- IF WANTED_PLOT_FIELD --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_GEM_WANTED_PLOT_FIELD_HINT}</span></dd>
+			</dl>
 		</fieldset>
 		<p class="submit-buttons">
 			<input type="submit" class="button1" value="{L_SUBMIT}" />
@@ -324,6 +382,8 @@
 				<th>{L_PROFILE_SEARCHABLE}</th>
 				<th>{L_PROFILE_SHOW_ON_ROSTER}</th>
 				<th>{L_PROFILE_SHOW_IN_SHOWCASE}</th>
+				<th>{L_GEM_WANTED_CHARACTER_FIELD}</th>
+				<th>{L_GEM_WANTED_PLOT_FIELD}</th>
 				<th>{L_PROFILE_SORT_ORDER}</th>
 				<th>{L_ACTIONS}</th>
 			</tr>
@@ -340,6 +400,8 @@
 				<td><!-- IF fields.SEARCHABLE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><!-- IF fields.SHOW_ON_ROSTER -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><!-- IF fields.SHOW_IN_SHOWCASE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><!-- IF fields.WANTED_CHARACTER_FIELD -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><!-- IF fields.WANTED_PLOT_FIELD -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><input type="number" name="sort_order[{fields.FIELD_ID}]" value="{fields.SORT_ORDER}" size="4" class="inputbox" /></td>
 				<td>
 					<a href="{fields.U_EDIT}">{L_EDIT}</a>

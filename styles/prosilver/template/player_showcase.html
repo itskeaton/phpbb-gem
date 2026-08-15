@@ -1,0 +1,41 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1><a href="{U_PLAYER_PROFILE}" style="color: {PLAYER_COLOUR};">{PLAYER_USERNAME}</a>{L_GEM_SHOWCASE_HEADING_SUFFIX}</h1>
+
+<!-- IF not S_HAS_CHARACTERS -->
+	<p class="gensmall">{L_GEM_NO_SHOWCASE_CHARACTERS}</p>
+<!-- ENDIF -->
+
+<div id="gem-showcase-grid">
+	<!-- BEGIN characters -->
+	<a href="{characters.U_PROFILE}" class="gem-showcase-tile">
+		<!-- IF characters.DISPLAY_IMAGE -->
+			<img src="{characters.DISPLAY_IMAGE}" alt="{characters.CHARACTER_NAME}" class="gem-showcase-image" />
+		<!-- ENDIF -->
+		<div class="gem-showcase-name">{characters.CHARACTER_NAME}</div>
+
+		<!-- IF .hover_fields -->
+		<div class="gem-showcase-hover">
+			<!-- BEGIN hover_fields -->
+			<p><strong>{characters.hover_fields.LABEL}:</strong> {characters.hover_fields.VALUE}</p>
+			<!-- END hover_fields -->
+		</div>
+		<!-- ENDIF -->
+	</a>
+	<!-- END characters -->
+</div>
+
+<style>
+	#gem-showcase-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+	.gem-showcase-tile { position: relative; display: block; width: 220px; overflow: hidden; text-decoration: none; }
+	.gem-showcase-image { width: 100%; height: 280px; object-fit: cover; display: block; }
+	.gem-showcase-name { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px; background: rgba(0,0,0,0.6); color: #fff; }
+	.gem-showcase-hover {
+		position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+		background: rgba(0,0,0,0.85); color: #fff; padding: 12px;
+		opacity: 0; transition: opacity 0.2s ease; overflow-y: auto;
+	}
+	.gem-showcase-tile:hover .gem-showcase-hover { opacity: 1; }
+</style>
+
+<!-- INCLUDE overall_footer.html -->

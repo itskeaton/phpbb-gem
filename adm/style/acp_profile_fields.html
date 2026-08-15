@@ -180,6 +180,11 @@
 				<dd><input type="checkbox" id="show_on_roster" name="show_on_roster" value="1"<!-- IF SHOW_ON_ROSTER --> checked="checked"<!-- ENDIF --> />
 					<br /><span class="gem-hint">{L_PROFILE_SHOW_ON_ROSTER_HINT}</span></dd>
 			</dl>
+			<dl>
+				<dt><label for="show_in_showcase">{L_PROFILE_SHOW_IN_SHOWCASE}</label></dt>
+				<dd><input type="checkbox" id="show_in_showcase" name="show_in_showcase" value="1"<!-- IF SHOW_IN_SHOWCASE --> checked="checked"<!-- ENDIF --> />
+					<br /><span class="gem-hint">{L_PROFILE_SHOW_IN_SHOWCASE_HINT}</span></dd>
+			</dl>
 		</fieldset>
 		<p class="submit-buttons">
 			<input type="submit" class="button1" value="{L_SUBMIT}" />
@@ -203,6 +208,7 @@
 				<th>{L_PROFILE_REQUIRED}</th>
 				<th>{L_PROFILE_SEARCHABLE}</th>
 				<th>{L_PROFILE_SHOW_ON_ROSTER}</th>
+				<th>{L_PROFILE_SHOW_IN_SHOWCASE}</th>
 				<th>{L_PROFILE_SORT_ORDER}</th>
 				<th>{L_ACTIONS}</th>
 			</tr>
@@ -218,6 +224,7 @@
 				<td><!-- IF fields.REQUIRED -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><!-- IF fields.SEARCHABLE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><!-- IF fields.SHOW_ON_ROSTER -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
+				<td><!-- IF fields.SHOW_IN_SHOWCASE -->{L_YES}<!-- ELSE -->{L_NO}<!-- ENDIF --></td>
 				<td><input type="number" name="sort_order[{fields.FIELD_ID}]" value="{fields.SORT_ORDER}" size="4" class="inputbox" /></td>
 				<td>
 					<a href="{fields.U_EDIT}">{L_EDIT}</a>

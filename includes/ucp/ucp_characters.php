@@ -173,6 +173,7 @@ class ucp_characters
 			'avatar'         => '',
 			'avatar_width'   => 120,
 			'avatar_height'  => 120,
+			'showcase_image' => '',
 			'signature'      => '',
 		);
 
@@ -212,6 +213,7 @@ class ucp_characters
 			'AVATAR_URL'       => $character['avatar'],
 			'AVATAR_WIDTH'     => $character['avatar_width'],
 			'AVATAR_HEIGHT'    => $character['avatar_height'],
+			'SHOWCASE_IMAGE'   => $character['showcase_image'],
 			'SIGNATURE'        => $character['signature'],
 			'U_SAVE'           => $this->u_action . '&amp;action=save&amp;character_id=' . (int) $character_id,
 		));
@@ -333,6 +335,7 @@ class ucp_characters
 		$avatar_url     = $request->variable('avatar_url', '', true);
 		$avatar_width   = $request->variable('avatar_width', 120);
 		$avatar_height  = $request->variable('avatar_height', 120);
+		$showcase_image = $request->variable('showcase_image', '', true);
 		$signature_raw  = $request->variable('signature', '', true);
 
 		if ($character_name === '')
@@ -351,6 +354,7 @@ class ucp_characters
 			'avatar_type'                => $avatar_url ? 'avatar.driver.remote' : '',
 			'avatar_width'               => (int) $avatar_width,
 			'avatar_height'              => (int) $avatar_height,
+			'showcase_image'             => $showcase_image,
 			'signature'                  => $signature_raw,
 			'signature_bbcode_uid'       => $signature_uid,
 			'signature_bbcode_bitfield'  => $signature_bitfield,

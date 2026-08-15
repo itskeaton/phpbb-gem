@@ -330,6 +330,7 @@ class acp_profile_fields
 				'REQUIRED'      => (bool) $row['required'],
 				'SEARCHABLE'    => (bool) $row['searchable'],
 				'SHOW_ON_ROSTER' => (bool) $row['show_on_roster'],
+				'SHOW_IN_SHOWCASE' => (bool) $row['show_in_showcase'],
 				'SORT_ORDER'    => $row['sort_order'],
 				'U_EDIT'        => $this->u_action . "&amp;mode=fields&amp;action=edit&amp;field_id={$row['field_id']}",
 				'U_DELETE'      => $this->u_action . "&amp;mode=fields&amp;action=delete&amp;field_id={$row['field_id']}",
@@ -359,6 +360,7 @@ class acp_profile_fields
 			'required_enforcement' => 'creation',
 			'searchable'           => 0,
 			'show_on_roster'       => 0,
+			'show_in_showcase'     => 0,
 		);
 
 		if ($action == 'edit' && $field_id)
@@ -388,6 +390,7 @@ class acp_profile_fields
 			'REQUIRED'              => (bool) $field['required'],
 			'SEARCHABLE'            => (bool) $field['searchable'],
 			'SHOW_ON_ROSTER'        => (bool) $field['show_on_roster'],
+			'SHOW_IN_SHOWCASE'      => (bool) $field['show_in_showcase'],
 			'U_SAVE'                => $this->u_action . '&amp;mode=fields&amp;action=save&amp;field_id=' . (int) $field_id,
 		));
 
@@ -416,6 +419,7 @@ class acp_profile_fields
 		$enforcement = $request->variable('required_enforcement', 'creation');
 		$searchable  = $request->variable('searchable', 0);
 		$show_on_roster = $request->variable('show_on_roster', 0);
+		$show_in_showcase = $request->variable('show_in_showcase', 0);
 
 		if ($label === '')
 		{
@@ -468,6 +472,7 @@ class acp_profile_fields
 			'required_enforcement' => $enforcement,
 			'searchable'           => $searchable ? 1 : 0,
 			'show_on_roster'       => $show_on_roster ? 1 : 0,
+			'show_in_showcase'     => $show_in_showcase ? 1 : 0,
 		);
 
 		if ($field_id)

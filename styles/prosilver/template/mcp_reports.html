@@ -1,0 +1,41 @@
+<!-- INCLUDE mcp_header.html -->
+
+<h2>{L_REPORTS}</h2>
+
+<table cellspacing="1">
+	<thead>
+		<tr>
+			<th>{L_POST_SUBJECT}</th>
+			<th>{L_AUTHOR}</th>
+			<th>{L_REPORTER}</th>
+			<th>{L_FORUM}</th>
+			<th>{L_REPORT_DATE}</th>
+			<th>{L_ACTIONS}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!-- BEGIN postrow -->
+		<tr>
+			<td>
+				<a href="{postrow.U_VIEW_DETAILS}">{postrow.POST_SUBJECT}</a>
+			</td>
+			<td>
+				{postrow.POST_AUTHOR_FULL}
+				<!-- IF postrow.GEM_S_IS_CHARACTER -->
+				<br /><span class="gensmall">{L_GEM_REAL_PLAYER_LABEL} {postrow.GEM_REAL_PLAYER}</span>
+				<!-- ENDIF -->
+			</td>
+			<td>{postrow.REPORTER_FULL}</td>
+			<td>{postrow.FORUM_NAME}</td>
+			<td>{postrow.REPORT_TIME}</td>
+			<td>
+				<a href="{postrow.U_VIEW_DETAILS}">{L_VIEW_REPORT}</a>
+				&nbsp;|&nbsp;
+				<a href="{postrow.U_VIEWPOST}">{L_VIEW_POST}</a>
+			</td>
+		</tr>
+		<!-- END postrow -->
+	</tbody>
+</table>
+
+<!-- INCLUDE mcp_footer.html -->

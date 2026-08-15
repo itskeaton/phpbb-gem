@@ -28,6 +28,7 @@ define('IN_PHPBB', true);
 $phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
 include($phpbb_root_path . 'common.' . $phpEx);
+require_once($phpbb_root_path . 'includes/gem/song_embed.' . $phpEx);
 
 $user->session_begin();
 $auth->acl($user->data);
@@ -312,6 +313,10 @@ function gem_roster_get_field_values($character_id)
 		{
 			$decoded = json_decode($value, true);
 			$value = is_array($decoded) ? implode(', ', $decoded) : '';
+		}
+		else if ($row['field_type'] === 'songlist')
+		{
+			$value = gem_render_songlist($value); // raw embed HTML - same "trusted, unescaped" convention as SIGNATURE
 		}
 		$values[$row['field_key']] = $value;
 	}

@@ -39,6 +39,8 @@ $lang = array_merge($lang, array(
 	'GEM_SIGNATURE'          => 'Signature',
 	'GEM_FIELD_REQUIRED'     => '"%s" is required.',
 	'GEM_FIELD_COMING_SOON'  => 'This field type isn\'t available to fill in yet.',
+	'GEM_SONGLIST_HINT'      => 'One song URL per line - Spotify, YouTube, Apple Music, or SoundCloud.',
+	'GEM_UNRECOGNIZED_SONG_PROVIDER' => 'This isn\'t a recognized song link, so nothing was saved: %s',
 
 	'GEM_CHARACTER_CREATED'  => 'Character created.',
 	'GEM_CHARACTER_SAVED'    => 'Character saved.',
@@ -73,6 +75,7 @@ $lang = array_merge($lang, array(
 	'GEM_IMAGE_DELETED'     => 'Image deleted.',
 	'GEM_IMAGE_NOT_FOUND'   => 'That image could not be found.',
 	'GEM_INVALID_ALBUM'     => 'That is not a recognized album.',
+	'GEM_GALLERY_QUOTA_REACHED' => 'You\'ve reached the limit of %d images for this character.',
 	'GEM_DEFAULT'           => 'Default',
 	'GEM_SET_DEFAULT'       => 'Set as default',
 	'GEM_DEFAULT_SET'       => 'Default sidebar image updated.',

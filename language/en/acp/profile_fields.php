@@ -78,4 +78,6 @@ $lang = array_merge($lang, array(
 	'GEM_MAX_CHARACTERS_HINT'       => '0 = unlimited.',
 	'GEM_SELF_UNARCHIVE'            => 'Players may unarchive their own characters',
 	'GEM_SELF_UNARCHIVE_HINT'       => 'When off, unarchiving a character requires staff action instead.',
+	'GEM_GALLERY_QUOTA'             => 'Gallery image limit per character',
+	'GEM_GALLERY_QUOTA_HINT'        => 'Total across both albums (sidebar + misc) combined. 0 = unlimited.',
 ));

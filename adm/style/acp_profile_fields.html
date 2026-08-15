@@ -43,6 +43,11 @@
 				<dd><input type="checkbox" id="gem_self_unarchive" name="gem_self_unarchive" value="1"<!-- IF GEM_SELF_UNARCHIVE --> checked="checked"<!-- ENDIF --> />
 					<br /><span class="gem-hint">{L_GEM_SELF_UNARCHIVE_HINT}</span></dd>
 			</dl>
+			<dl>
+				<dt><label for="gem_gallery_quota">{L_GEM_GALLERY_QUOTA}</label></dt>
+				<dd><input type="number" id="gem_gallery_quota" name="gem_gallery_quota" value="{GEM_GALLERY_QUOTA}" min="0" size="4" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_GALLERY_QUOTA_HINT}</span></dd>
+			</dl>
 		</fieldset>
 		<p class="submit-buttons">
 			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />

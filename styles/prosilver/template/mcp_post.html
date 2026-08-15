@@ -1,0 +1,72 @@
+<!-- INCLUDE mcp_header.html -->
+
+<h2>{L_POST_DETAILS}</h2>
+
+<!-- IF S_POST_REPORTED --><p class="gem-notice">{REPORTED_IMG} {L_POST_REPORTED}</p><!-- ENDIF -->
+<!-- IF S_POST_UNAPPROVED --><p class="gem-notice">{UNAPPROVED_IMG} {L_POST_UNAPPROVED}</p><!-- ENDIF -->
+<!-- IF S_POST_DELETED --><p class="gem-notice">{DELETED_IMG} {DELETED_MESSAGE}</p><!-- ENDIF -->
+<!-- IF S_POST_LOCKED --><p class="gem-notice">{L_POST_LOCKED}</p><!-- ENDIF -->
+
+<div class="gem-post-details">
+	<dl>
+		<dt>{L_AUTHOR}</dt>
+		<dd>{POST_AUTHOR_FULL}</dd>
+
+		<!-- IF GEM_S_IS_CHARACTER -->
+		<dt>{L_GEM_REAL_PLAYER_LABEL}</dt>
+		<dd>{GEM_REAL_PLAYER}</dd>
+		<!-- ENDIF -->
+
+		<dt>{L_POST_SUBJECT}</dt>
+		<dd>{POST_SUBJECT}</dd>
+
+		<dt>{L_POST_DATE}</dt>
+		<dd>{POST_DATE}</dd>
+
+		<!-- IF REPORTER_FULL -->
+		<dt>{L_REPORTER}</dt>
+		<dd>{REPORTER_FULL}</dd>
+
+		<dt>{L_REPORT_REASON}</dt>
+		<dd>{REPORT_REASON_TITLE} - {REPORT_REASON_DESCRIPTION}</dd>
+
+		<!-- IF REPORT_TEXT -->
+		<dt>{L_REPORT_TEXT}</dt>
+		<dd>{REPORT_TEXT}</dd>
+		<!-- ENDIF -->
+
+		<dt>{L_REPORT_DATE}</dt>
+		<dd>{REPORT_DATE}</dd>
+		<!-- ENDIF -->
+
+		<!-- IF S_CAN_VIEWIP -->
+		<dt>{L_POSTER_IP}</dt>
+		<dd>
+			{POST_IP}
+			<!-- IF POST_IPADDR --> ({POST_IPADDR})<!-- ENDIF -->
+			<!-- IF U_LOOKUP_IP --> - <a href="{U_LOOKUP_IP}">{L_LOOKUP_IP}</a><!-- ENDIF -->
+			<!-- IF U_WHOIS --> - <a href="{U_WHOIS}">{L_WHOIS}</a><!-- ENDIF -->
+		</dd>
+		<!-- ENDIF -->
+	</dl>
+
+	<div class="gem-post-preview">
+		{POST_PREVIEW}
+	</div>
+
+	<!-- IF SIGNATURE -->
+	<div class="gem-post-signature">{SIGNATURE}</div>
+	<!-- ENDIF -->
+</div>
+
+<div class="gem-post-actions">
+	<a href="{U_VIEW_POST}">{L_VIEW_POST}</a>
+	<!-- IF U_VIEW_TOPIC --> | <a href="{U_VIEW_TOPIC}">{L_VIEW_TOPIC}</a><!-- ENDIF -->
+	<!-- IF U_EDIT --> | <a href="{U_EDIT}">{L_EDIT_POST}</a><!-- ENDIF -->
+	<!-- IF S_CAN_APPROVE and U_MCP_APPROVE --> | <a href="{U_MCP_APPROVE}">{L_APPROVE}</a><!-- ENDIF -->
+	<!-- IF U_MCP_REPORT --> | <a href="{U_MCP_REPORT}">{L_VIEW_REPORT}</a><!-- ENDIF -->
+	<!-- IF U_MCP_USER_NOTES --> | <a href="{U_MCP_USER_NOTES}">{L_USER_NOTES}</a><!-- ENDIF -->
+	<!-- IF U_MCP_WARN_USER --> | <a href="{U_MCP_WARN_USER}">{L_WARN_USER}</a><!-- ENDIF -->
+</div>
+
+<!-- INCLUDE mcp_footer.html -->

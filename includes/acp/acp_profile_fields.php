@@ -94,10 +94,12 @@ class acp_profile_fields
 			$require_approval = $request->variable('gem_require_approval', 0);
 			$max_characters   = $request->variable('gem_max_characters', 0);
 			$self_unarchive   = $request->variable('gem_self_unarchive', 0);
+			$gallery_quota    = $request->variable('gem_gallery_quota', 0);
 
 			$config->set('gem_require_approval', $require_approval ? 1 : 0);
 			$config->set('gem_max_characters', max(0, $max_characters));
 			$config->set('gem_self_unarchive', $self_unarchive ? 1 : 0);
+			$config->set('gem_gallery_quota', max(0, $gallery_quota));
 
 			trigger_error($user->lang('ACP_GEM_SETTINGS_SAVED') . adm_back_link($this->u_action . '&amp;mode=settings'));
 		}
@@ -107,6 +109,7 @@ class acp_profile_fields
 			'GEM_REQUIRE_APPROVAL'  => (bool) $config['gem_require_approval'],
 			'GEM_MAX_CHARACTERS'    => (int) $config['gem_max_characters'],
 			'GEM_SELF_UNARCHIVE'    => (bool) $config['gem_self_unarchive'],
+			'GEM_GALLERY_QUOTA'     => (int) $config['gem_gallery_quota'],
 		));
 	}
 

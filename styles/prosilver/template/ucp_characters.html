@@ -137,6 +137,9 @@
 						<!-- IF custom_fields.VALUE -->
 						<br /><img src="{custom_fields.VALUE}" alt="" style="max-width: 150px; max-height: 150px; margin-top: 4px;" />
 						<!-- ENDIF -->
+					<!-- ELSEIF custom_fields.S_SONGLIST -->
+						<textarea id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" rows="5" cols="45" placeholder="https://open.spotify.com/track/...">{custom_fields.VALUE}</textarea>
+						<br /><span class="gensmall">{L_GEM_SONGLIST_HINT}</span>
 					<!-- ELSEIF custom_fields.S_DATE -->
 						<input type="date" id="field_{custom_fields.FIELD_ID}" name="field_{custom_fields.FIELD_ID}" value="{custom_fields.VALUE}" class="inputbox" />
 					<!-- ELSEIF custom_fields.S_CHECKBOX -->

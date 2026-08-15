@@ -10,16 +10,17 @@
  *     driver framework (upload/gravatar/remote picker). Stored as
  *     avatar_type = 'avatar.driver.remote' so it should render correctly
  *     through phpBB's existing avatar pipeline, but there's no upload UI.
- *   - Dynamic fields of type 'songlist' render as a disabled placeholder
- *     ("coming soon") - the song-embed subsystem hasn't been built yet.
- *     The 'image' field type and the character gallery, however, ARE now
- *     functional (see the gallery actions below) - only songlist remains
- *     a stub.
+ *   - Every dynamic field type is now functional, including 'songlist'
+ *     (provider-agnostic song embeds - Spotify, YouTube, Apple Music,
+ *     SoundCloud) and 'image' (see the gallery actions below). No stubs
+ *     remain in this controller.
  *   - Staff-only actions (unarchive when self-serve is off) are gated on
  *     $auth->acl_get('a_') as a stand-in for a real "staff" permission.
  *     Replace with a dedicated ACL permission before relying on this for
  *     anything beyond testing.
  */
+
+require_once(__DIR__ . '/../gem/song_embed.php');
 
 class ucp_characters
 {
@@ -271,7 +272,17 @@ class ucp_characters
 		while ($row = $db->sql_fetchrow($result))
 		{
 			$raw_value = isset($existing_values[$row['field_id']]) ? $existing_values[$row['field_id']] : '';
-			$is_unsupported = in_array($row['field_type'], array('songlist'), true);
+			$is_unsupported = false; // no stubs remain
+
+			$songlist_urls = '';
+			if ($row['field_type'] === 'songlist' && $raw_value !== '')
+			{
+				$decoded = json_decode($raw_value, true);
+				if (is_array($decoded))
+				{
+					$songlist_urls = implode("\n", array_column($decoded, 'url'));
+				}
+			}
 
 			$block = array(
 				'FIELD_ID'      => $row['field_id'],
@@ -288,8 +299,9 @@ class ucp_characters
 				'S_DATE'        => ($row['field_type'] === 'date'),
 				'S_URL'         => ($row['field_type'] === 'url'),
 				'S_IMAGE'       => ($row['field_type'] === 'image'),
+				'S_SONGLIST'    => ($row['field_type'] === 'songlist'),
 				'S_CHECKBOX'    => ($row['field_type'] === 'checkbox'),
-				'VALUE'         => ($row['field_type'] !== 'multiselect') ? $raw_value : '',
+				'VALUE'         => ($row['field_type'] === 'multiselect') ? '' : (($row['field_type'] === 'songlist') ? $songlist_urls : $raw_value),
 				'CHECKED'       => ($row['field_type'] === 'checkbox' && $raw_value === '1'),
 			);
 
@@ -439,12 +451,29 @@ class ucp_characters
 
 		foreach ($fields as $field)
 		{
-			if (in_array($field['field_type'], array('songlist'), true))
-			{
-				continue; // not functional yet - see class doc comment
-			}
-
 			$post_key = 'field_' . $field['field_id'];
+
+			if ($field['field_type'] === 'songlist')
+			{
+				$raw_lines = $request->variable($post_key, '', true);
+				$urls = array_filter(array_map('trim', explode("\n", $raw_lines)));
+
+				$entries = array();
+				foreach ($urls as $url)
+				{
+					$detected = gem_detect_song_provider($url);
+					if (!$detected)
+					{
+						// Reject at input, per spec - the whole save fails rather
+						// than silently dropping the one bad line.
+						trigger_error($user->lang('GEM_UNRECOGNIZED_SONG_PROVIDER', $url) . adm_back_link($this->u_action), E_USER_WARNING);
+					}
+					$entries[] = array('url' => $url, 'provider' => $detected['provider']);
+				}
+
+				$this->upsert_field_value($field['field_id'], $character_id, json_encode($entries));
+				continue;
+			}
 
 			if ($field['field_type'] === 'multiselect')
 			{
@@ -472,30 +501,49 @@ class ucp_characters
 				}
 			}
 
-			// upsert
-			$sql = 'SELECT value_id FROM ' . $this->values_table . '
-					WHERE field_id = ' . (int) $field['field_id'] . '
-					AND owner_type = 2 AND owner_id = ' . (int) $character_id;
-			$existing_result = $db->sql_query($sql);
-			$existing = $db->sql_fetchrow($existing_result);
-			$db->sql_freeresult($existing_result);
+			$this->upsert_field_value($field['field_id'], $character_id, $value);
+		}
+	}
 
-			if ($existing)
-			{
-				$sql = 'UPDATE ' . $this->values_table . ' SET value = \'' . $db->sql_escape($value) . '\'
-						WHERE value_id = ' . (int) $existing['value_id'];
-				$db->sql_query($sql);
-			}
-			else if ($value !== '' && $value !== '[]')
-			{
-				$sql = 'INSERT INTO ' . $this->values_table . ' ' . $db->sql_build_array('INSERT', array(
-					'field_id'   => (int) $field['field_id'],
-					'owner_type' => 2,
-					'owner_id'   => (int) $character_id,
-					'value'      => $value,
-				));
-				$db->sql_query($sql);
-			}
+	/**
+	 * Shared upsert for a single field value. An empty/placeholder value
+	 * ('' or '[]', the empty-multiselect sentinel) deletes any existing row
+	 * rather than storing an empty one - keeps the values table free of
+	 * dead weight for fields the player left blank.
+	 */
+	private function upsert_field_value($field_id, $character_id, $value)
+	{
+		global $db;
+
+		$sql = 'SELECT value_id FROM ' . $this->values_table . '
+				WHERE field_id = ' . (int) $field_id . '
+				AND owner_type = 2 AND owner_id = ' . (int) $character_id;
+		$result = $db->sql_query($sql);
+		$existing = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		$is_empty = ($value === '' || $value === '[]');
+
+		if ($existing && $is_empty)
+		{
+			$sql = 'DELETE FROM ' . $this->values_table . ' WHERE value_id = ' . (int) $existing['value_id'];
+			$db->sql_query($sql);
+		}
+		else if ($existing)
+		{
+			$sql = 'UPDATE ' . $this->values_table . ' SET value = \'' . $db->sql_escape($value) . '\'
+					WHERE value_id = ' . (int) $existing['value_id'];
+			$db->sql_query($sql);
+		}
+		else if (!$is_empty)
+		{
+			$sql = 'INSERT INTO ' . $this->values_table . ' ' . $db->sql_build_array('INSERT', array(
+				'field_id'   => (int) $field_id,
+				'owner_type' => 2,
+				'owner_id'   => (int) $character_id,
+				'value'      => $value,
+			));
+			$db->sql_query($sql);
 		}
 	}
 
@@ -705,6 +753,21 @@ class ucp_characters
 			if ($image_url === '')
 			{
 				trigger_error($user->lang('GEM_IMAGE_URL_REQUIRED') . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id), E_USER_WARNING);
+			}
+
+			global $config;
+			$quota = (int) $config['gem_gallery_quota'];
+			if ($quota > 0)
+			{
+				$sql = 'SELECT COUNT(*) AS cnt FROM ' . $this->gallery_table . ' WHERE character_id = ' . (int) $character_id;
+				$result = $db->sql_query($sql);
+				$current_count = (int) $db->sql_fetchfield('cnt');
+				$db->sql_freeresult($result);
+
+				if ($current_count >= $quota)
+				{
+					trigger_error($user->lang('GEM_GALLERY_QUOTA_REACHED', $quota) . adm_back_link($this->u_action . '&amp;action=gallery&amp;character_id=' . (int) $character_id), E_USER_WARNING);
+				}
 			}
 
 			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->gallery_table . '

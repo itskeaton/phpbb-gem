@@ -27,6 +27,11 @@ class acp_profile_fields_info
 					'auth'  => 'acl_a_board',
 					'cat'   => array('ACP_CAT_GEM'),
 				),
+				'ticket_categories' => array(
+					'title' => 'ACP_TICKET_CATEGORIES',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
 			),
 		);
 	}

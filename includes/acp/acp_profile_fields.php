@@ -24,6 +24,10 @@ class acp_profile_fields
 	private $fields_table;
 	/** @var string */
 	private $values_table;
+	/** @var string */
+	private $ticket_categories_table;
+	/** @var string */
+	private $ticket_category_fields_table;
 
 	private $allowed_field_types = array('text', 'textarea', 'select', 'multiselect', 'date', 'url', 'checkbox', 'image', 'songlist');
 	private $allowed_applies_to = array(1 => 'PROFILE_APPLIES_PLAYER', 2 => 'PROFILE_APPLIES_CHARACTER', 3 => 'PROFILE_APPLIES_BOTH');
@@ -40,6 +44,8 @@ class acp_profile_fields
 		$this->sections_table = $table_prefix . 'profile_sections';
 		$this->fields_table   = $table_prefix . 'profile_fields';
 		$this->values_table   = $table_prefix . 'profile_values';
+		$this->ticket_categories_table = $table_prefix . 'ticket_categories';
+		$this->ticket_category_fields_table = $table_prefix . 'ticket_category_fields';
 
 		$action = $request->variable('action', 'list');
 
@@ -60,6 +66,8 @@ class acp_profile_fields
 			'U_FIELDS_MODE'   => $this->u_action . '&amp;mode=fields',
 			'U_SECTIONS_MODE' => $this->u_action . '&amp;mode=sections',
 			'U_SETTINGS_MODE' => $this->u_action . '&amp;mode=settings',
+			'U_TICKET_CATEGORIES_MODE' => $this->u_action . '&amp;mode=ticket_categories',
+			'S_TICKET_CATEGORIES_MODE' => ($mode == 'ticket_categories'),
 		));
 
 		if ($mode == 'sections')
@@ -69,6 +77,10 @@ class acp_profile_fields
 		else if ($mode == 'settings')
 		{
 			$this->handle_settings();
+		}
+		else if ($mode == 'ticket_categories')
+		{
+			$this->handle_ticket_categories($action);
 		}
 		else
 		{
@@ -655,5 +667,231 @@ class acp_profile_fields
 		$text = strtolower(trim($text));
 		$text = preg_replace('/[^a-z0-9]+/', '_', $text);
 		return trim($text, '_');
+	}
+
+	// -------------------------------------------------------------------
+	// Ticket categories
+	// -------------------------------------------------------------------
+
+	private function handle_ticket_categories($action)
+	{
+		global $db, $user, $template, $request;
+
+		$category_id = $request->variable('category_id', 0);
+
+		switch ($action)
+		{
+			case 'add':
+			case 'edit':
+				$this->ticket_category_form($action, $category_id);
+				return;
+
+			case 'save':
+				$this->ticket_category_save($category_id);
+				return;
+
+			case 'delete':
+				$this->ticket_category_delete($category_id);
+				return;
+		}
+
+		$sql = 'SELECT * FROM ' . $this->ticket_categories_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('ticket_categories', array(
+				'CATEGORY_ID'   => $row['category_id'],
+				'CATEGORY_NAME' => $row['category_name'],
+				'IS_APPLICATION' => (bool) $row['is_character_application'],
+				'SORT_ORDER'    => $row['sort_order'],
+				'U_EDIT'        => $this->u_action . "&amp;mode=ticket_categories&amp;action=edit&amp;category_id={$row['category_id']}",
+				'U_DELETE'      => $this->u_action . "&amp;mode=ticket_categories&amp;action=delete&amp;category_id={$row['category_id']}",
+			));
+		}
+		$db->sql_freeresult($result);
+
+		$template->assign_vars(array(
+			'U_ADD_TICKET_CATEGORY' => $this->u_action . '&amp;mode=ticket_categories&amp;action=add',
+		));
+	}
+
+	private function ticket_category_form($action, $category_id)
+	{
+		global $db, $template;
+
+		$category = array(
+			'category_name'             => '',
+			'is_character_application'  => 0,
+			'required_group'            => 0,
+		);
+		$assigned_field_ids = array();
+
+		if ($action == 'edit' && $category_id)
+		{
+			$sql = 'SELECT * FROM ' . $this->ticket_categories_table . ' WHERE category_id = ' . (int) $category_id;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$row)
+			{
+				trigger_error('GEM_TICKET_CATEGORY_NOT_FOUND', E_USER_WARNING);
+			}
+			$category = $row;
+
+			$sql = 'SELECT field_id FROM ' . $this->ticket_category_fields_table . ' WHERE category_id = ' . (int) $category_id;
+			$result = $db->sql_query($sql);
+			while ($row = $db->sql_fetchrow($result))
+			{
+				$assigned_field_ids[] = (int) $row['field_id'];
+			}
+			$db->sql_freeresult($result);
+		}
+
+		$template->assign_vars(array(
+			'S_EDIT_TICKET_CATEGORY' => true,
+			'CATEGORY_ID'            => $category_id,
+			'CATEGORY_NAME'          => $category['category_name'],
+			'IS_APPLICATION'         => (bool) $category['is_character_application'],
+			'REQUIRED_GROUP'         => (int) $category['required_group'],
+			'U_SAVE'                 => $this->u_action . '&amp;mode=ticket_categories&amp;action=save&amp;category_id=' . (int) $category_id,
+		));
+
+		// Every field usable on a ticket form - applies_to is irrelevant here,
+		// tickets are their own context, so all fields are eligible regardless
+		// of whether they also apply to player/character.
+		$sql = 'SELECT field_id, label FROM ' . $this->fields_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('field_checkboxes', array(
+				'FIELD_ID' => $row['field_id'],
+				'LABEL'    => $row['label'],
+				'CHECKED'  => in_array((int) $row['field_id'], $assigned_field_ids, true),
+			));
+		}
+		$db->sql_freeresult($result);
+
+		// Groups, for the "restrict to group" dropdown
+		$this->assign_group_options((int) $category['required_group']);
+	}
+
+	private function assign_group_options($selected = 0)
+	{
+		global $db, $template, $user;
+
+		$template->assign_block_vars('group_options', array(
+			'VALUE'    => 0,
+			'LABEL'    => $user->lang('GEM_ANY_LOGGED_IN'),
+			'SELECTED' => ($selected === 0),
+		));
+
+		$sql = 'SELECT group_id, group_name FROM ' . GROUPS_TABLE . ' ORDER BY group_name ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('group_options', array(
+				'VALUE'    => $row['group_id'],
+				'LABEL'    => $row['group_name'],
+				'SELECTED' => ($selected === (int) $row['group_id']),
+			));
+		}
+		$db->sql_freeresult($result);
+	}
+
+	private function ticket_category_save($category_id)
+	{
+		global $db, $user, $request;
+
+		if (!check_form_key('acp_profile_fields'))
+		{
+			trigger_error('FORM_INVALID', E_USER_WARNING);
+		}
+
+		$category_name = $request->variable('category_name', '', true);
+		$is_application = $request->variable('is_character_application', 0);
+		$required_group = $request->variable('required_group', 0);
+		$field_ids = $request->variable('field_ids', array(0));
+
+		if ($category_name === '')
+		{
+			trigger_error($user->lang('GEM_TICKET_CATEGORY_NAME_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=ticket_categories'), E_USER_WARNING);
+		}
+
+		$sql_ary = array(
+			'category_name'             => $category_name,
+			'is_character_application'  => $is_application ? 1 : 0,
+			'required_group'            => (int) $required_group,
+		);
+
+		if ($category_id)
+		{
+			$sql = 'UPDATE ' . $this->ticket_categories_table . ' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE category_id = ' . (int) $category_id;
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->ticket_categories_table;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+			$sql_ary['sort_order'] = ((int) $row['max_order']) + 1;
+
+			$sql = 'INSERT INTO ' . $this->ticket_categories_table . ' ' . $db->sql_build_array('INSERT', $sql_ary);
+			$db->sql_query($sql);
+			$category_id = (int) $db->sql_nextid();
+		}
+
+		// Field assignment - full replace, simplest correct approach
+		$sql = 'DELETE FROM ' . $this->ticket_category_fields_table . ' WHERE category_id = ' . (int) $category_id;
+		$db->sql_query($sql);
+
+		$sort = 0;
+		foreach (array_filter($field_ids) as $field_id)
+		{
+			$sql = 'INSERT INTO ' . $this->ticket_category_fields_table . ' ' . $db->sql_build_array('INSERT', array(
+				'category_id' => (int) $category_id,
+				'field_id'    => (int) $field_id,
+				'sort_order'  => $sort++,
+			));
+			$db->sql_query($sql);
+		}
+
+		trigger_error($user->lang('GEM_TICKET_CATEGORY_SAVED') . adm_back_link($this->u_action . '&amp;mode=ticket_categories'));
+	}
+
+	private function ticket_category_delete($category_id)
+	{
+		global $db, $user;
+
+		if (!$category_id)
+		{
+			trigger_error('GEM_TICKET_CATEGORY_NOT_FOUND', E_USER_WARNING);
+		}
+
+		// KNOWN SIMPLIFICATION: doesn't check for or block deletion of a
+		// category that still has tickets under it - existing tickets would
+		// end up with an orphaned category_id. Fine for a category you're
+		// certain is unused; avoid deleting ones with real ticket history
+		// until this gets a proper safety check.
+		if (confirm_box(true))
+		{
+			$sql = 'DELETE FROM ' . $this->ticket_category_fields_table . ' WHERE category_id = ' . (int) $category_id;
+			$db->sql_query($sql);
+
+			$sql = 'DELETE FROM ' . $this->ticket_categories_table . ' WHERE category_id = ' . (int) $category_id;
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_TICKET_CATEGORY_DELETED') . adm_back_link($this->u_action . '&amp;mode=ticket_categories'));
+		}
+		else
+		{
+			confirm_box(false, 'GEM_TICKET_CATEGORY_DELETE_CONFIRM', build_hidden_fields(array(
+				'category_id' => $category_id,
+				'action'      => 'delete',
+				'mode'        => 'ticket_categories',
+			)));
+		}
 	}
 }

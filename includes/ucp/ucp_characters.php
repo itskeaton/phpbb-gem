@@ -408,6 +408,11 @@ class ucp_characters
 
 			$this->log_status_change($character_id, 0, $sql_ary['status'], null, $my_user_id);
 
+			if ($require_approval)
+			{
+				$this->create_application_ticket($character_id, $my_user_id);
+			}
+
 			// If this is the player's first character, make it their default automatically.
 			$sql = 'SELECT user_id FROM ' . $this->characters_active_table . ' WHERE user_id = ' . $my_user_id;
 			$result = $db->sql_query($sql);
@@ -649,6 +654,42 @@ class ucp_characters
 		$this->log_status_change($character_id, self::STATUS_ARCHIVED, self::STATUS_ACTIVE, null, $my_user_id);
 
 		trigger_error($user->lang('GEM_CHARACTER_UNARCHIVED') . adm_back_link($this->u_action));
+	}
+
+	/**
+	 * Creates the ticket that wraps a pending character for staff review.
+	 * Finds the category flagged is_character_application=1 - if none
+	 * exists (an admin hasn't set one up yet), the character still gets
+	 * created as pending, it just won't show up anywhere for staff to
+	 * review until a category is configured. Flagged via a warning message
+	 * rather than silently failing.
+	 */
+	private function create_application_ticket($character_id, $user_id)
+	{
+		global $db, $table_prefix;
+
+		$tickets_table = $table_prefix . 'tickets';
+		$categories_table = $table_prefix . 'ticket_categories';
+
+		$sql = 'SELECT category_id FROM ' . $categories_table . ' WHERE is_character_application = 1';
+		$result = $db->sql_query($sql);
+		$category = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		if (!$category)
+		{
+			return; // no Character Application category configured yet - character stays pending with nothing to review it against
+		}
+
+		$sql = 'INSERT INTO ' . $tickets_table . ' ' . $db->sql_build_array('INSERT', array(
+			'category_id'  => (int) $category['category_id'],
+			'user_id'      => (int) $user_id,
+			'character_id' => (int) $character_id,
+			'status'       => 1, // open
+			'created_at'   => time(),
+			'updated_at'   => time(),
+		));
+		$db->sql_query($sql);
 	}
 
 	private function log_status_change($character_id, $old_status, $new_status, $reason, $changed_by)

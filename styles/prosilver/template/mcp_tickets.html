@@ -1,0 +1,125 @@
+<!-- INCLUDE mcp_header.html -->
+
+<h2>{L_MCP_GEM_TICKETS_QUEUE}</h2>
+
+<!-- IF S_DECLINE_PROMPT -->
+
+	<form id="mcp_decline_form" method="post" action="{U_ACTION}&amp;action=decline&amp;ticket_id={TICKET_ID}">
+		<fieldset>
+			<legend>{L_GEM_DECLINE_REASON}</legend>
+			<dl>
+				<dt><label for="reason">{L_GEM_DECLINE_REASON}</label></dt>
+				<dd><textarea id="reason" name="reason" rows="4" cols="45"></textarea>
+					<br /><span class="gensmall">{L_GEM_DECLINE_REASON_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_GEM_CONFIRM_DECLINE}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_VIEW_TICKET -->
+
+	<h3>{CATEGORY_NAME}</h3>
+	<dl>
+		<dt>{L_GEM_SUBMITTER}</dt>
+		<dd>{SUBMITTER}</dd>
+		<!-- IF CLAIMED_BY -->
+		<dt>{L_GEM_CLAIMED_BY}</dt>
+		<dd>{CLAIMED_BY}</dd>
+		<!-- ENDIF -->
+		<!-- IF S_HAS_CHARACTER -->
+		<dt>{L_GEM_LINKED_CHARACTER}</dt>
+		<dd>{LINKED_CHARACTER}</dd>
+		<!-- ENDIF -->
+	</dl>
+
+	<!-- IF .submitted_fields -->
+	<dl>
+		<!-- BEGIN submitted_fields -->
+		<dt>{submitted_fields.LABEL}</dt>
+		<dd>{submitted_fields.VALUE}</dd>
+		<!-- END submitted_fields -->
+	</dl>
+	<!-- ENDIF -->
+
+	<div class="gem-ticket-thread">
+		<!-- BEGIN replies -->
+		<div class="gem-ticket-reply<!-- IF replies.S_STAFF --> gem-ticket-reply-staff<!-- ENDIF -->">
+			<strong>{replies.USERNAME}</strong> <span class="gensmall">{replies.TIME}</span>
+			<p>{replies.MESSAGE}</p>
+		</div>
+		<!-- END replies -->
+	</div>
+
+	<!-- IF not S_RESOLVED -->
+	<div class="gem-mcp-actions">
+		<a href="{U_CLAIM}">{L_GEM_CLAIM}</a>
+		<!-- IF S_IS_APPLICATION -->
+			&nbsp;|&nbsp;
+			<a href="{U_APPROVE}">{L_GEM_APPROVE}</a>
+			&nbsp;|&nbsp;
+			<a href="{U_DECLINE_SUBMIT}">{L_GEM_DECLINE}</a>
+		<!-- ELSE -->
+			&nbsp;|&nbsp;
+			<a href="{U_CLOSE}">{L_GEM_CLOSE_TICKET}</a>
+		<!-- ENDIF -->
+	</div>
+
+	<form id="mcp_ticket_reply" method="post" action="{U_REPLY}">
+		<fieldset>
+			<dl>
+				<dt><label for="message">{L_GEM_REPLY}</label></dt>
+				<dd><textarea id="message" name="message" rows="5" cols="45"></textarea></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_GEM_POST_REPLY}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+	<!-- ENDIF -->
+
+<!-- ELSE -->
+
+	<form method="get" action="{U_QUEUE}">
+		<select name="category_id" onchange="this.form.submit()">
+			<option value="0">{L_GEM_ALL_CATEGORIES}</option>
+			<!-- BEGIN category_filter -->
+			<option value="{category_filter.VALUE}"<!-- IF category_filter.SELECTED --> selected="selected"<!-- ENDIF -->>{category_filter.LABEL}</option>
+			<!-- END category_filter -->
+		</select>
+	</form>
+
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_CATEGORY_NAME}</th>
+				<th>{L_GEM_SUBMITTER}</th>
+				<th>{L_GEM_STATUS}</th>
+				<th>{L_GEM_CLAIMED_BY}</th>
+				<th>{L_GEM_CREATED}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN tickets -->
+			<tr>
+				<td>
+					{tickets.CATEGORY_NAME}
+					<!-- IF tickets.S_IS_APPLICATION --> <span class="gensmall">({L_GEM_APPLICATION})</span><!-- ENDIF -->
+				</td>
+				<td>{tickets.SUBMITTER}</td>
+				<td>{tickets.STATUS_LABEL}</td>
+				<td>{tickets.CLAIMED_BY}</td>
+				<td>{tickets.CREATED}</td>
+				<td><a href="{tickets.U_VIEW}">{L_VIEW}</a></td>
+			</tr>
+			<!-- END tickets -->
+		</tbody>
+	</table>
+
+<!-- ENDIF -->
+
+<!-- INCLUDE mcp_footer.html -->

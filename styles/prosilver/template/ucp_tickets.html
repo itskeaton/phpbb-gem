@@ -1,0 +1,116 @@
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{L_UCP_TICKETS_MANAGE}</h2>
+
+<!-- IF S_CATEGORY_PICKER -->
+
+	<p>{L_GEM_PICK_CATEGORY}</p>
+	<ul>
+		<!-- BEGIN categories -->
+		<li><a href="{categories.U_SUBMIT}">{categories.CATEGORY_NAME}</a></li>
+		<!-- END categories -->
+	</ul>
+
+<!-- ELSEIF S_SUBMIT_FORM -->
+
+	<form id="ucp_ticket_submit" method="post" action="{U_CREATE}">
+		<fieldset>
+			<legend>{CATEGORY_NAME}</legend>
+
+			<!-- BEGIN ticket_fields -->
+			<dl>
+				<dt><label for="field_{ticket_fields.FIELD_ID}">{ticket_fields.LABEL}<!-- IF ticket_fields.REQUIRED --> *<!-- ENDIF --></label></dt>
+				<dd>
+					<!-- IF ticket_fields.S_TEXT -->
+						<input type="text" id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}" value="{ticket_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF ticket_fields.S_TEXTAREA -->
+						<textarea id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}" rows="5" cols="45">{ticket_fields.VALUE}</textarea>
+					<!-- ELSEIF ticket_fields.S_URL -->
+						<input type="url" id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}" value="{ticket_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF ticket_fields.S_DATE -->
+						<input type="date" id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}" value="{ticket_fields.VALUE}" class="inputbox" />
+					<!-- ELSEIF ticket_fields.S_CHECKBOX -->
+						<input type="checkbox" id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}" value="1"<!-- IF ticket_fields.CHECKED --> checked="checked"<!-- ENDIF --> />
+					<!-- ELSEIF ticket_fields.S_SELECT -->
+						<select id="field_{ticket_fields.FIELD_ID}" name="field_{ticket_fields.FIELD_ID}">
+							<option value=""></option>
+							<!-- BEGIN choices -->
+							<option value="{ticket_fields.choices.VALUE}"<!-- IF ticket_fields.choices.SELECTED --> selected="selected"<!-- ENDIF -->>{ticket_fields.choices.LABEL}</option>
+							<!-- END choices -->
+						</select>
+					<!-- ENDIF -->
+				</dd>
+			</dl>
+			<!-- END ticket_fields -->
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_VIEW_TICKET -->
+
+	<h3>{CATEGORY_NAME} &raquo; {STATUS_LABEL}</h3>
+
+	<!-- IF .submitted_fields -->
+	<dl>
+		<!-- BEGIN submitted_fields -->
+		<dt>{submitted_fields.LABEL}</dt>
+		<dd>{submitted_fields.VALUE}</dd>
+		<!-- END submitted_fields -->
+	</dl>
+	<!-- ENDIF -->
+
+	<div class="gem-ticket-thread">
+		<!-- BEGIN replies -->
+		<div class="gem-ticket-reply<!-- IF replies.S_STAFF --> gem-ticket-reply-staff<!-- ENDIF -->">
+			<strong>{replies.USERNAME}</strong> <span class="gensmall">{replies.TIME}</span>
+			<p>{replies.MESSAGE}</p>
+		</div>
+		<!-- END replies -->
+	</div>
+
+	<!-- IF not S_RESOLVED -->
+	<form id="ucp_ticket_reply" method="post" action="{U_REPLY}">
+		<fieldset>
+			<dl>
+				<dt><label for="message">{L_GEM_REPLY}</label></dt>
+				<dd><textarea id="message" name="message" rows="5" cols="45"></textarea></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_GEM_POST_REPLY}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+	<!-- ENDIF -->
+
+<!-- ELSE -->
+
+	<p><a href="{U_NEW_TICKET}" class="button2">{L_GEM_NEW_TICKET}</a></p>
+
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_CATEGORY_NAME}</th>
+				<th>{L_GEM_STATUS}</th>
+				<th>{L_GEM_UPDATED}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN tickets -->
+			<tr>
+				<td>{tickets.CATEGORY_NAME}</td>
+				<td>{tickets.STATUS_LABEL}</td>
+				<td>{tickets.UPDATED}</td>
+				<td><a href="{tickets.U_VIEW}">{L_VIEW}</a></td>
+			</tr>
+			<!-- END tickets -->
+		</tbody>
+	</table>
+
+<!-- ENDIF -->
+
+<!-- INCLUDE ucp_footer.html -->

@@ -22,4 +22,5 @@ $lang = array_merge($lang, array(
 	'GEM_SIDEBAR_IMAGE'       => 'Sidebar Image',
 	'GEM_USE_DEFAULT_IMAGE'   => "(use this character's default)",
 	'GEM_SIDEBAR_IMAGE_HINT'  => 'Pick a different sidebar image just for this post, or leave as default.',
+	'GEM_REAL_PLAYER_LABEL'   => 'Played by:',
 ));

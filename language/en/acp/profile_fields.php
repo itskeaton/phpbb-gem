@@ -98,4 +98,15 @@ $lang = array_merge($lang, array(
 	'GEM_TICKET_CATEGORY_DELETED'   => 'Category deleted.',
 	'GEM_TICKET_CATEGORY_DELETE_CONFIRM' => 'Delete this ticket category? Existing tickets under it are not deleted, but will lose their category association.',
 	'GEM_TICKET_CATEGORY_NOT_FOUND' => 'That category could not be found.',
+
+	'ACP_CONNECTION_CATEGORIES'     => 'Connection Categories',
+	'GEM_ADD_CONNECTION_CATEGORY'   => 'Add category',
+	'GEM_CONNECTION_CATEGORY_DETAILS' => 'Category details',
+	'GEM_CATEGORY_COLOR'            => 'Colour',
+	'GEM_CATEGORY_COLOR_HINT'       => 'Shows as an avatar border on connections using this category.',
+	'GEM_INVALID_COLOR'             => 'That\'s not a valid 6-digit hex colour.',
+	'GEM_CONNECTION_CATEGORY_SAVED' => 'Category saved.',
+	'GEM_CONNECTION_CATEGORY_DELETED' => 'Category deleted.',
+	'GEM_CONNECTION_CATEGORY_DELETE_CONFIRM' => 'Delete this connection category? Existing connections using it are not deleted, but will lose their category association.',
+	'GEM_CONNECTION_CATEGORY_NOT_FOUND' => 'That category could not be found.',
 ));

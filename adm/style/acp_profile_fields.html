@@ -3,39 +3,15 @@
 <h1>{L_ACP_PROFILE_FIELDS}</h1>
 
 <p class="gem-mode-tabs">
-	<!-- IF S_SECTIONS_MODE -->
-		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SECTIONS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SETTINGS_MODE}" class="gem-tab">{L_ACP_GEM_SETTINGS}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab">{L_ACP_TICKET_CATEGORIES}</a>
-	<!-- ELSEIF S_SETTINGS_MODE_TAB -->
-		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SETTINGS_MODE}" class="gem-tab gem-tab-active">{L_ACP_GEM_SETTINGS}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab">{L_ACP_TICKET_CATEGORIES}</a>
-	<!-- ELSEIF S_TICKET_CATEGORIES_MODE -->
-		<a href="{U_FIELDS_MODE}" class="gem-tab">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SETTINGS_MODE}" class="gem-tab">{L_ACP_GEM_SETTINGS}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab gem-tab-active">{L_ACP_TICKET_CATEGORIES}</a>
-	<!-- ELSE -->
-		<a href="{U_FIELDS_MODE}" class="gem-tab gem-tab-active">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SECTIONS_MODE}" class="gem-tab">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_SETTINGS_MODE}" class="gem-tab">{L_ACP_GEM_SETTINGS}</a>
-		&nbsp;|&nbsp;
-		<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab">{L_ACP_TICKET_CATEGORIES}</a>
-	<!-- ENDIF -->
+	<a href="{U_FIELDS_MODE}" class="gem-tab<!-- IF not S_SECTIONS_MODE and not S_SETTINGS_MODE_TAB and not S_TICKET_CATEGORIES_MODE and not S_CONNECTION_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_FIELDS_MANAGE}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_SECTIONS_MODE}" class="gem-tab<!-- IF S_SECTIONS_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_PROFILE_SECTIONS_MANAGE}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_SETTINGS_MODE}" class="gem-tab<!-- IF S_SETTINGS_MODE_TAB --> gem-tab-active<!-- ENDIF -->">{L_ACP_GEM_SETTINGS}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_TICKET_CATEGORIES_MODE}" class="gem-tab<!-- IF S_TICKET_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_TICKET_CATEGORIES}</a>
+	&nbsp;|&nbsp;
+	<a href="{U_CONNECTION_CATEGORIES_MODE}" class="gem-tab<!-- IF S_CONNECTION_CATEGORIES_MODE --> gem-tab-active<!-- ENDIF -->">{L_ACP_CONNECTION_CATEGORIES}</a>
 </p>
 
 <!-- IF S_SETTINGS_MODE -->
@@ -135,6 +111,57 @@
 				</td>
 			</tr>
 			<!-- END ticket_categories -->
+		</tbody>
+	</table>
+
+<!-- ELSEIF S_CONNECTION_CATEGORIES_MODE and S_EDIT_CONNECTION_CATEGORY -->
+	<!-- ============ CONNECTION CATEGORY ADD/EDIT FORM ============ -->
+	<form id="acp_connection_category_form" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_CONNECTION_CATEGORY_DETAILS}</legend>
+			<dl>
+				<dt><label for="category_name">{L_GEM_CATEGORY_NAME}</label></dt>
+				<dd><input type="text" id="category_name" name="category_name" value="{CATEGORY_NAME}" maxlength="255" class="inputbox" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="color">{L_GEM_CATEGORY_COLOR}</label></dt>
+				<dd>
+					<input type="color" id="color_picker" value="#{COLOR}" onchange="document.getElementById('color').value = this.value.substring(1);" />
+					<input type="text" id="color" name="color" value="{COLOR}" maxlength="6" size="6" class="inputbox" />
+					<br /><span class="gem-hint">{L_GEM_CATEGORY_COLOR_HINT}</span>
+				</dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSEIF S_CONNECTION_CATEGORIES_MODE -->
+	<!-- ============ CONNECTION CATEGORIES LIST ============ -->
+	<p><a href="{U_ADD_CONNECTION_CATEGORY}" class="button2">{L_GEM_ADD_CONNECTION_CATEGORY}</a></p>
+
+	<table cellspacing="1">
+		<thead>
+			<tr>
+				<th>{L_GEM_CATEGORY_NAME}</th>
+				<th>{L_GEM_CATEGORY_COLOR}</th>
+				<th>{L_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- BEGIN connection_categories -->
+			<tr>
+				<td>{connection_categories.CATEGORY_NAME}</td>
+				<td><span style="display:inline-block; width:16px; height:16px; background:#{connection_categories.COLOR}; border:1px solid #333;"></span> #{connection_categories.COLOR}</td>
+				<td>
+					<a href="{connection_categories.U_EDIT}">{L_EDIT}</a>
+					&nbsp;|&nbsp;
+					<a href="{connection_categories.U_DELETE}">{L_DELETE}</a>
+				</td>
+			</tr>
+			<!-- END connection_categories -->
 		</tbody>
 	</table>
 

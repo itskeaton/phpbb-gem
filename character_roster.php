@@ -291,6 +291,7 @@ function gem_roster_show_profile($character_id)
 	gem_roster_assign_recent_posts($character);
 	gem_roster_assign_linked_player($character);
 	gem_roster_assign_sibling_characters($character);
+	gem_roster_assign_connections($character_id);
 
 	page_footer();
 }
@@ -436,6 +437,42 @@ function gem_roster_assign_sibling_characters($character)
 			'CHARACTER_NAME' => $row['character_name'],
 			'AVATAR_URL'     => $row['avatar'],
 			'U_PROFILE'      => append_sid("{$GLOBALS['phpbb_root_path']}character_roster.{$GLOBALS['phpEx']}", 'mode=profile&amp;character_id=' . $row['character_id']),
+		));
+	}
+	$db->sql_freeresult($result);
+}
+
+/**
+ * Connections this character has created (i.e. this character's own view
+ * of its relationships) - not connections OTHER characters have made
+ * pointing at this one. Directed/one-sided per spec: what shows here is
+ * "who this character says they're connected to," not a symmetric list.
+ */
+function gem_roster_assign_connections($character_id)
+{
+	global $db, $template, $table_prefix;
+
+	$connections_table = $table_prefix . 'connections';
+	$categories_table   = $table_prefix . 'connection_categories';
+	$characters_table    = $table_prefix . 'characters';
+
+	$sql = 'SELECT c.*, ch.character_name AS target_name, ch.avatar AS target_avatar, cat.category_name, cat.color
+			FROM ' . $connections_table . ' c
+			LEFT JOIN ' . $characters_table . ' ch ON c.connected_character_id = ch.character_id
+			LEFT JOIN ' . $categories_table . ' cat ON c.category_id = cat.category_id
+			WHERE c.character_id = ' . (int) $character_id . '
+			AND ch.status = ' . STATUS_ACTIVE . '
+			ORDER BY c.created_at DESC';
+	$result = $db->sql_query($sql);
+	while ($row = $db->sql_fetchrow($result))
+	{
+		$template->assign_block_vars('connections', array(
+			'TARGET_NAME'   => $row['target_name'],
+			'TARGET_AVATAR' => $row['target_avatar'],
+			'CATEGORY_NAME' => $row['category_name'],
+			'COLOR'         => $row['color'],
+			'DESCRIPTION'   => $row['description'],
+			'U_PROFILE'     => append_sid("{$GLOBALS['phpbb_root_path']}character_roster.{$GLOBALS['phpEx']}", 'mode=profile&amp;character_id=' . $row['connected_character_id']),
 		));
 	}
 	$db->sql_freeresult($result);

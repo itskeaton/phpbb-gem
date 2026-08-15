@@ -61,6 +61,28 @@
 	</section>
 	<!-- ENDIF -->
 
+	<!-- IF .connections -->
+	<section class="gem-profile-section">
+		<h2>{L_GEM_CONNECTIONS}</h2>
+		<div class="gem-connections-grid">
+			<!-- BEGIN connections -->
+			<div class="gem-connection-tile">
+				<a href="{connections.U_PROFILE}">
+					<!-- IF connections.TARGET_AVATAR -->
+					<img src="{connections.TARGET_AVATAR}" alt="{connections.TARGET_NAME}" style="border: 4px solid #{connections.COLOR}; width: 80px; height: 80px; object-fit: cover;" />
+					<!-- ENDIF -->
+					<div>{connections.TARGET_NAME}</div>
+				</a>
+				<div class="gensmall" style="color: #{connections.COLOR};">{connections.CATEGORY_NAME}</div>
+				<!-- IF connections.DESCRIPTION -->
+				<p class="gensmall">{connections.DESCRIPTION}</p>
+				<!-- ENDIF -->
+			</div>
+			<!-- END connections -->
+		</div>
+	</section>
+	<!-- ENDIF -->
+
 	<!-- IF .recent_posts -->
 	<section class="gem-profile-section">
 		<h2>{L_GEM_RECENT_POSTS}</h2>

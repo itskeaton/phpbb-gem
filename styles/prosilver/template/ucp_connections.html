@@ -1,0 +1,64 @@
+<!-- INCLUDE ucp_header.html -->
+
+<h2>{L_UCP_CONNECTIONS_MANAGE}</h2>
+
+<!-- IF S_ADD_CONNECTION -->
+
+	<form id="ucp_connection_add" method="post" action="{U_SAVE}">
+		<fieldset>
+			<legend>{L_GEM_ADD_CONNECTION} &raquo; {CHARACTER_NAME}</legend>
+			<dl>
+				<dt><label for="target_name">{L_GEM_TARGET_CHARACTER}</label></dt>
+				<dd><input type="text" id="target_name" name="target_name" class="inputbox" />
+					<br /><span class="gensmall">{L_GEM_TARGET_CHARACTER_HINT}</span></dd>
+			</dl>
+			<dl>
+				<dt><label for="category_id">{L_GEM_CATEGORY_NAME}</label></dt>
+				<dd>
+					<select id="category_id" name="category_id">
+						<!-- BEGIN category_options -->
+						<option value="{category_options.VALUE}">{category_options.LABEL}</option>
+						<!-- END category_options -->
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt><label for="description">{L_GEM_DESCRIPTION}</label></dt>
+				<dd><textarea id="description" name="description" rows="3" cols="45"></textarea>
+					<br /><span class="gensmall">{L_GEM_DESCRIPTION_HINT}</span></dd>
+			</dl>
+		</fieldset>
+		<p class="submit-buttons">
+			<input type="submit" name="submit" class="button1" value="{L_SUBMIT}" />
+			{S_FORM_TOKEN}
+		</p>
+	</form>
+
+<!-- ELSE -->
+
+	<!-- BEGIN characters -->
+	<h3>{characters.CHARACTER_NAME}</h3>
+	<p><a href="{characters.U_ADD}" class="button2">{L_GEM_ADD_CONNECTION}</a></p>
+
+	<div class="gem-connections-grid">
+		<!-- BEGIN connections -->
+		<div class="gem-connection-tile">
+			<a href="{characters.connections.U_TARGET_PROFILE}">
+				<!-- IF characters.connections.TARGET_AVATAR -->
+				<img src="{characters.connections.TARGET_AVATAR}" alt="{characters.connections.TARGET_NAME}" style="border: 4px solid #{characters.connections.COLOR}; width: 80px; height: 80px; object-fit: cover;" />
+				<!-- ENDIF -->
+				<div>{characters.connections.TARGET_NAME}</div>
+			</a>
+			<div class="gensmall" style="color: #{characters.connections.COLOR};">{characters.connections.CATEGORY_NAME}</div>
+			<!-- IF characters.connections.DESCRIPTION -->
+			<p class="gensmall">{characters.connections.DESCRIPTION}</p>
+			<!-- ENDIF -->
+			<a href="{characters.connections.U_DELETE}" class="gensmall">{L_DELETE}</a>
+		</div>
+		<!-- END connections -->
+	</div>
+	<!-- END characters -->
+
+<!-- ENDIF -->
+
+<!-- INCLUDE ucp_footer.html -->

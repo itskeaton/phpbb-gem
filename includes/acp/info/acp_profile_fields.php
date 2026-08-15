@@ -32,6 +32,11 @@ class acp_profile_fields_info
 					'auth'  => 'acl_a_board',
 					'cat'   => array('ACP_CAT_GEM'),
 				),
+				'connection_categories' => array(
+					'title' => 'ACP_CONNECTION_CATEGORIES',
+					'auth'  => 'acl_a_board',
+					'cat'   => array('ACP_CAT_GEM'),
+				),
 			),
 		);
 	}

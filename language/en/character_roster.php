@@ -25,6 +25,7 @@ $lang = array_merge($lang, array(
 	'GEM_NO_RESULTS'        => 'No characters match your search.',
 	'GEM_PLAYED_BY'         => 'Played By',
 	'GEM_OTHER_CHARACTERS'  => 'Other Characters',
+	'GEM_CONNECTIONS'       => 'Connections',
 	'GEM_RECENT_POSTS'      => 'Recent Posts',
 	'GEM_CHARACTER_NOT_FOUND' => 'That character could not be found.',
 ));

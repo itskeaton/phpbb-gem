@@ -28,6 +28,8 @@ class acp_profile_fields
 	private $ticket_categories_table;
 	/** @var string */
 	private $ticket_category_fields_table;
+	/** @var string */
+	private $connection_categories_table;
 
 	private $allowed_field_types = array('text', 'textarea', 'select', 'multiselect', 'date', 'url', 'checkbox', 'image', 'songlist');
 	private $allowed_applies_to = array(1 => 'PROFILE_APPLIES_PLAYER', 2 => 'PROFILE_APPLIES_CHARACTER', 3 => 'PROFILE_APPLIES_BOTH');
@@ -46,6 +48,7 @@ class acp_profile_fields
 		$this->values_table   = $table_prefix . 'profile_values';
 		$this->ticket_categories_table = $table_prefix . 'ticket_categories';
 		$this->ticket_category_fields_table = $table_prefix . 'ticket_category_fields';
+		$this->connection_categories_table = $table_prefix . 'connection_categories';
 
 		$action = $request->variable('action', 'list');
 
@@ -68,6 +71,8 @@ class acp_profile_fields
 			'U_SETTINGS_MODE' => $this->u_action . '&amp;mode=settings',
 			'U_TICKET_CATEGORIES_MODE' => $this->u_action . '&amp;mode=ticket_categories',
 			'S_TICKET_CATEGORIES_MODE' => ($mode == 'ticket_categories'),
+			'U_CONNECTION_CATEGORIES_MODE' => $this->u_action . '&amp;mode=connection_categories',
+			'S_CONNECTION_CATEGORIES_MODE' => ($mode == 'connection_categories'),
 		));
 
 		if ($mode == 'sections')
@@ -81,6 +86,10 @@ class acp_profile_fields
 		else if ($mode == 'ticket_categories')
 		{
 			$this->handle_ticket_categories($action);
+		}
+		else if ($mode == 'connection_categories')
+		{
+			$this->handle_connection_categories($action);
 		}
 		else
 		{
@@ -891,6 +900,158 @@ class acp_profile_fields
 				'category_id' => $category_id,
 				'action'      => 'delete',
 				'mode'        => 'ticket_categories',
+			)));
+		}
+	}
+
+	// -------------------------------------------------------------------
+	// Connection categories
+	// -------------------------------------------------------------------
+
+	private function handle_connection_categories($action)
+	{
+		global $db, $user, $template, $request;
+
+		$category_id = $request->variable('category_id', 0);
+
+		switch ($action)
+		{
+			case 'add':
+			case 'edit':
+				$this->connection_category_form($action, $category_id);
+				return;
+
+			case 'save':
+				$this->connection_category_save($category_id);
+				return;
+
+			case 'delete':
+				$this->connection_category_delete($category_id);
+				return;
+		}
+
+		$sql = 'SELECT * FROM ' . $this->connection_categories_table . ' ORDER BY sort_order ASC';
+		$result = $db->sql_query($sql);
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$template->assign_block_vars('connection_categories', array(
+				'CATEGORY_ID'   => $row['category_id'],
+				'CATEGORY_NAME' => $row['category_name'],
+				'COLOR'         => $row['color'],
+				'U_EDIT'        => $this->u_action . "&amp;mode=connection_categories&amp;action=edit&amp;category_id={$row['category_id']}",
+				'U_DELETE'      => $this->u_action . "&amp;mode=connection_categories&amp;action=delete&amp;category_id={$row['category_id']}",
+			));
+		}
+		$db->sql_freeresult($result);
+
+		$template->assign_vars(array(
+			'U_ADD_CONNECTION_CATEGORY' => $this->u_action . '&amp;mode=connection_categories&amp;action=add',
+		));
+	}
+
+	private function connection_category_form($action, $category_id)
+	{
+		global $db, $template;
+
+		$category = array('category_name' => '', 'color' => '999999');
+
+		if ($action == 'edit' && $category_id)
+		{
+			$sql = 'SELECT * FROM ' . $this->connection_categories_table . ' WHERE category_id = ' . (int) $category_id;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+
+			if (!$row)
+			{
+				trigger_error('GEM_CONNECTION_CATEGORY_NOT_FOUND', E_USER_WARNING);
+			}
+			$category = $row;
+		}
+
+		$template->assign_vars(array(
+			'S_EDIT_CONNECTION_CATEGORY' => true,
+			'CATEGORY_ID'   => $category_id,
+			'CATEGORY_NAME' => $category['category_name'],
+			'COLOR'         => $category['color'],
+			'U_SAVE'        => $this->u_action . '&amp;mode=connection_categories&amp;action=save&amp;category_id=' . (int) $category_id,
+		));
+	}
+
+	private function connection_category_save($category_id)
+	{
+		global $db, $user, $request;
+
+		if (!check_form_key('acp_profile_fields'))
+		{
+			trigger_error('FORM_INVALID', E_USER_WARNING);
+		}
+
+		$category_name = $request->variable('category_name', '', true);
+		$color = ltrim($request->variable('color', '999999', true), '#');
+
+		if ($category_name === '')
+		{
+			trigger_error($user->lang('GEM_CATEGORY_NAME_REQUIRED') . adm_back_link($this->u_action . '&amp;mode=connection_categories'), E_USER_WARNING);
+		}
+
+		if (!preg_match('/^[0-9a-fA-F]{6}$/', $color))
+		{
+			trigger_error($user->lang('GEM_INVALID_COLOR') . adm_back_link($this->u_action . '&amp;mode=connection_categories'), E_USER_WARNING);
+		}
+
+		$sql_ary = array(
+			'category_name' => $category_name,
+			'color'         => $color,
+		);
+
+		if ($category_id)
+		{
+			$sql = 'UPDATE ' . $this->connection_categories_table . ' SET ' . $db->sql_build_array('UPDATE', $sql_ary) . '
+					WHERE category_id = ' . (int) $category_id;
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$sql = 'SELECT MAX(sort_order) AS max_order FROM ' . $this->connection_categories_table;
+			$result = $db->sql_query($sql);
+			$row = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+			$sql_ary['sort_order'] = ((int) $row['max_order']) + 1;
+
+			$sql = 'INSERT INTO ' . $this->connection_categories_table . ' ' . $db->sql_build_array('INSERT', $sql_ary);
+			$db->sql_query($sql);
+		}
+
+		trigger_error($user->lang('GEM_CONNECTION_CATEGORY_SAVED') . adm_back_link($this->u_action . '&amp;mode=connection_categories'));
+	}
+
+	private function connection_category_delete($category_id)
+	{
+		global $db, $user;
+
+		if (!$category_id)
+		{
+			trigger_error('GEM_CONNECTION_CATEGORY_NOT_FOUND', E_USER_WARNING);
+		}
+
+		// Same known simplification as ticket category deletion - existing
+		// connections using this category aren't checked for/blocked, they'd
+		// end up with an orphaned category_id. Avoid deleting categories with
+		// real connections attached until this gets a proper safety check.
+		if (confirm_box(true))
+		{
+			$sql = 'DELETE FROM ' . $this->connection_categories_table . ' WHERE category_id = ' . (int) $category_id;
+			$db->sql_query($sql);
+
+			trigger_error($user->lang('GEM_CONNECTION_CATEGORY_DELETED') . adm_back_link($this->u_action . '&amp;mode=connection_categories'));
+		}
+		else
+		{
+			confirm_box(false, 'GEM_CONNECTION_CATEGORY_DELETE_CONFIRM', build_hidden_fields(array(
+				'category_id' => $category_id,
+				'action'      => 'delete',
+				'mode'        => 'connection_categories',
 			)));
 		}
 	}
